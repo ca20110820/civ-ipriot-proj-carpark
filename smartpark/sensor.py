@@ -96,4 +96,6 @@ class TkDetector(Detector):
 
 
 if __name__ == '__main__':
-    pass
+    from smartpark.config import Config
+
+    # CLIDetector(<entry_config>, <exit_config>).start_sensing()

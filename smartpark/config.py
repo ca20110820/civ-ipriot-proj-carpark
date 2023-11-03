@@ -187,11 +187,18 @@ class Config:
                 f"{car_park_config['name']}/display"
         return topic
 
+    def get_sensor_config_dict(self, car_park_name: str, sensor_name: str, sensor_type: str) -> dict | None:
+        sensor_config_dict_list = self.get_sensor_configs(car_park_name)
+        for sensor_config_dict in sensor_config_dict_list:
+            if sensor_config_dict["name"] == sensor_name and sensor_config_dict["topic-qualifier"] == sensor_type:
+                return sensor_config_dict
+        return None
+
 
 if __name__ == "__main__":
     config = Config(f"./play_config.toml")
 
-    car_park = "carpark2"
+    car_park = "carpark1"
 
     print(config.config_file_path)
     print(config.get_car_park_names())
@@ -208,3 +215,7 @@ if __name__ == "__main__":
         print(sensor_topic)
     print("-" * 50)
     print(config.create_car_park_display_topic(car_park))
+    print("-" * 50)
+    print(config.get_sensor_config_dict(car_park, "sensor1", "entry"))
+    print("-" * 50)
+    print(config.get_sensor_config_dict(car_park, "sensor2", "exit"))
