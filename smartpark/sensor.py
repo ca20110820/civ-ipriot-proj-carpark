@@ -27,7 +27,7 @@ class EntrySensor(Sensor):
         return random.randint(20, 30)
 
     def on_car_entry(self):
-        self.on_detection(f"Entry,{self.temperature}")
+        self.on_detection(f"Enter,{self.temperature}")
 
 
 class ExitSensor(Sensor):
