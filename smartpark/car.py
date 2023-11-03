@@ -130,7 +130,7 @@ class Car:
                     "entry_time": self._get_datetime_as_str("entry_time"),
                     "exit_time": self._get_datetime_as_str("exit_time"),
                     "entry_temperature": self.entry_temperature,
-                    "exit_temperature": self.entry_temperature,
+                    "exit_temperature": self.exit_temperature,
                     "is_parked": self._is_parked
                     }
 

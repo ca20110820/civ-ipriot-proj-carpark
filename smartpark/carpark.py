@@ -40,7 +40,7 @@ class CarPark(MqttDevice):
     
     @property
     def parked_cars(self) -> int:
-        return len(self.get_un_parked_cars())
+        return len(self.get_parked_cars())
 
     @property
     def un_parked_cars(self) -> int:
@@ -85,11 +85,21 @@ class CarPark(MqttDevice):
         # "<available-bays>;<temperature>;<time>"
         msg_str = f"{self.available_bays};" \
                   f"{self.temperature};" \
-                  f"{self._entry_or_exit_time}"
-
-        print(msg_str)
+                  f"{self._entry_or_exit_time.strftime('%Y-%m-%d %H:%M:%S')}"
 
         self.client.publish(self.display_topic, msg_str)
+        self._print_car_park_state()
+        print("=" * 100, "\n")
+
+    def _print_car_park_state(self):
+        print_dict = {"Available Bays": self.available_bays,
+                      "Number of Cars": self.total_cars,
+                      "Number of Parked Cars": self.parked_cars,
+                      "Number of Un-parked Cars": self.un_parked_cars,
+                      "Time": self._entry_or_exit_time.strftime('%Y-%m-%d %H:%M:%S'),
+                      "Temperature": self.temperature
+                      }
+        pprint.pprint(print_dict)
 
     def start_serving(self):
         """Implement the Event Loop"""
@@ -119,12 +129,13 @@ class SimulatedCarPark(CarPark):
         # Generate a Random Car
         car = Car.generate_random_car(["ModelA", "ModelB", "ModelC"])
 
-        if self.available_bays > 0:  # If there are available bay(s), park the car immediately
-            car.car_parked()
-
         self.add_car(car)
 
-        pprint.pprint(car.to_json_format())
+        if self.available_bays > 0:  # If there are available bay(s), park the car immediately
+            car.car_parked()
+            assert self._cars[-1].is_parked, "The recently added car failed to park!"
+
+        print(car.to_json_format(indent=4))
         self.publish_to_display()
 
     def on_car_exit(self):
@@ -136,7 +147,7 @@ class SimulatedCarPark(CarPark):
         if car is not None:
             car.car_unparked()  # Un-park the car regardless if it's parked or not!
             self.remove_car(car)
-            pprint.pprint(car.to_json_format())
+            print(car.to_json_format(indent=4))
             self.publish_to_display()
         else:
             print("There are no cars in the park to exit!")
@@ -154,3 +165,15 @@ class SimulatedCarPark(CarPark):
             self.on_car_entry()
         elif signal == "Exit":
             self.on_car_exit()
+
+
+if __name__ == "__main__":
+    from smartpark.config import Config
+    car_park_config = Config("./smartpark/play_config.toml")
+
+    car_park = SimulatedCarPark(car_park_config.get_car_park_config("carpark1"))
+    print(car_park.display_topic)
+    for sensor_top in car_park_config.get_sensor_pub_topics("carpark1"):
+        car_park.register_sensor_topic(sensor_top)
+
+    car_park.start_serving()

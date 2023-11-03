@@ -71,7 +71,6 @@ class Config:
 
         with open(self._config_file_path, "r") as file:
             config_dict = toml.load(file)
-            pprint.pprint(config_dict)
 
             for car_park_config in config_dict["car_parks"]:
                 self._car_park_dict_configs.append(car_park_config)
