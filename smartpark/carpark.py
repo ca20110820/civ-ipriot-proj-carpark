@@ -101,16 +101,16 @@ class CarPark(MqttDevice):
                       }
         pprint.pprint(print_dict)
 
-    def start_serving(self):
+    def start_serving(self, *args, **kwargs):
         """Implement the Event Loop"""
         # e.g. self.client.loop_forever()
         raise NotImplementedError()
 
-    def on_car_entry(self):
+    def on_car_entry(self, *args, **kwargs):
         """Implement how a new car would be generated and parked"""
         raise NotImplementedError()
 
-    def on_car_exit(self):
+    def on_car_exit(self, *args, **kwargs):
         """Implement how a car which car would exit and un-park"""
         raise NotImplementedError()
 
