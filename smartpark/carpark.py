@@ -85,7 +85,10 @@ class CarPark(MqttDevice):
         # "<available-bays>;<temperature>;<time>"
         msg_str = f"{self.available_bays};" \
                   f"{self.temperature};" \
-                  f"{self._entry_or_exit_time.strftime('%Y-%m-%d %H:%M:%S')}"
+                  f"{self._entry_or_exit_time.strftime('%Y-%m-%d %H:%M:%S')};"\
+                  f"{self.total_cars};"\
+                  f"{self.parked_cars};"\
+                  f"{self.un_parked_cars}"
 
         self.client.publish(self.display_topic, msg_str)
         self._print_car_park_state()
@@ -169,7 +172,7 @@ class SimulatedCarPark(CarPark):
 
 if __name__ == "__main__":
     from smartpark.config import Config
-    car_park_config = Config("./smartpark/play_config.toml")
+    car_park_config = Config("./play_config.toml")
 
     car_park = SimulatedCarPark(car_park_config.get_car_park_config("carpark1"))
     print(car_park.display_topic)
