@@ -151,7 +151,12 @@ class ConsoleDisplay(Display):
 
 
 if __name__ == "__main__":
-    car_park_config = Config("./play_config.toml")
+    from smartpark.config import Config
+    import os
+
+    toml_path = os.path.join(os.path.dirname(__file__), "play_config.toml")
+
+    car_park_config = Config(toml_path)
     display_config = car_park_config.get_display_configs("carpark1")[0]
     pprint.pprint(display_config)
     display = TkGUIDisplay(display_config,

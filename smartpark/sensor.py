@@ -104,7 +104,11 @@ class TkDetector(Detector):
 
 if __name__ == '__main__':
     from smartpark.config import Config
-    config = Config("./play_config.toml")
+    import os
+
+    toml_path = os.path.join(os.path.dirname(__file__), "play_config.toml")
+
+    config = Config(toml_path)
     TkDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                config.get_sensor_config_dict("carpark1", "sensor2", "exit")) \
         .start_sensing()

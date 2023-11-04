@@ -174,7 +174,11 @@ class SimulatedCarPark(CarPark):
 
 if __name__ == "__main__":
     from smartpark.config import Config
-    car_park_config = Config("./play_config.toml")
+    import os
+
+    toml_path = os.path.join(os.path.dirname(__file__), "play_config.toml")
+
+    car_park_config = Config(toml_path)
 
     car_park = SimulatedCarPark(car_park_config.get_car_park_config("carpark1"))
     print(car_park.display_topic)
