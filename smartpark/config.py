@@ -180,7 +180,7 @@ class Config:
 
         return sensor_pub_topics
 
-    def create_car_park_display_topic(self, car_park_name: str):
+    def create_car_park_display_topic(self, car_park_name: str) -> str:
         car_park_config = self.get_car_park_config(car_park_name)
         topic = f"{car_park_config['topic-root']}/{car_park_config['location']}/" \
                 f"{car_park_config['name']}/display"

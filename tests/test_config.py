@@ -1,22 +1,62 @@
 import unittest
 
-import tomli  # you can use toml, json,yaml, or ryo for your config file
-
-import smartpark.parse_config as pc
+from smartpark.config import Config
 
 
 class TestConfigParsing(unittest.TestCase):
-    def test_parse_config_has_correct_location_and_spaces(self):
-        # TODO: read from a configuration file...
-        config_string = '''
-        [parking_lot]
-        location = "Moondalup City Square Parking"
-        total_spaces = 192
-        broker_host = "localhost"
-        broker_port = 1883
-        '''
-        config = tomli.loads(config_string)
-        parking_lot = pc.parse_config(config)
-        self.assertEqual(parking_lot['location'], "Moondalup City Square Parking")
-        self.assertEqual(parking_lot['total_spaces'], 192)
-# TODO: create an additional TestCase in a separate file with at least one test of the remaining classes. 
+    def setUp(self) -> None:
+        self.config = Config(f"./sample_config.toml")
+
+    def test_car_park1(self):
+        car_park_name = "carpark1"
+        self.assertEqual(len(self.config.car_park_configs), 2)
+        self.assertIn(car_park_name, self.config.get_car_park_names())
+
+        self.assertEqual(len(self.config._get_common_config(car_park_name).keys()), 3)
+        self.assertEqual(self.config._get_common_config(car_park_name)["topic-root"], car_park_name)
+        self.assertEqual(self.config._get_common_config(car_park_name)["host"], "localhost")
+        self.assertEqual(self.config._get_common_config(car_park_name)["port"], 1883)
+
+        for sensor_config in self.config.get_sensor_configs(car_park_name):
+            self.assertIn(sensor_config["name"], ["sensor1", "sensor2"])
+            self.assertEqual(sensor_config["location"], "L306")
+            self.assertEqual(sensor_config["host"], "localhost")
+            self.assertEqual(sensor_config["port"], 1883)
+            self.assertEqual(sensor_config["topic-root"], car_park_name)
+            self.assertIn(sensor_config["topic-qualifier"], ["entry", "exit"])
+
+        car_park_config = self.config.get_car_park_config(car_park_name)
+        self.assertEqual(car_park_config["name"], car_park_name)
+        self.assertEqual(car_park_config["location"], "Moondaloop Park")
+        self.assertEqual(car_park_config["host"], "localhost")
+        self.assertEqual(car_park_config["port"], 1883)
+        self.assertEqual(car_park_config["topic-root"], car_park_name)
+        self.assertRaises(KeyError, lambda: car_park_config["topic-qualifier"])
+        self.assertEqual(car_park_config["total_bays"], 5)
+
+        for display_config in self.config.get_display_configs(car_park_name):
+            self.assertIn(display_config["name"], ["display1"])
+            self.assertEqual(display_config["location"], "Moondaloop Park")
+            self.assertEqual(display_config["host"], "localhost")
+            self.assertEqual(display_config["port"], 1883)
+            self.assertEqual(display_config["topic-root"], car_park_name)
+            self.assertEqual(display_config["topic-qualifier"], "na")
+
+        self.assertEqual(self.config.create_car_park_display_topic(car_park_name),
+                         "carpark1/Moondaloop Park/carpark1/display")
+
+        sensor_pub_topics = ["carpark1/L306/sensor1/entry",
+                             "carpark1/L306/sensor2/exit"
+                             ]
+        for pub_topic in sensor_pub_topics:
+            self.assertIn(pub_topic, self.config.get_sensor_pub_topics(car_park_name))
+
+        entry_sensor_config_dict = self.config.get_sensor_config_dict(car_park_name, "sensor1", "entry")
+        self.assertIn(entry_sensor_config_dict, self.config.get_sensor_configs(car_park_name))
+
+        exit_sensor_config_dict = self.config.get_sensor_config_dict(car_park_name, "sensor2", "exit")
+        self.assertIn(exit_sensor_config_dict, self.config.get_sensor_configs(car_park_name))
+
+
+if __name__ == "__main__":
+    unittest.main()
