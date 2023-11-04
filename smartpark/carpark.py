@@ -5,6 +5,7 @@ import paho.mqtt.client as paho
 from typing import List, Any
 from datetime import datetime
 
+from smartpark.utils import quit_listener
 from smartpark.mqtt_device import MqttDevice
 from smartpark.car import Car
 
@@ -155,6 +156,7 @@ class SimulatedCarPark(CarPark):
         else:
             print("There are no cars in the park to exit!")
 
+    @quit_listener
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         msg = message.payload.decode()
 

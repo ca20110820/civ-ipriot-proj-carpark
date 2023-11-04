@@ -6,6 +6,7 @@ import sys
 import tkinter as tk
 import pprint
 
+from smartpark.utils import quit_listener
 from smartpark.config import Config
 from smartpark.mqtt_device import MqttDevice
 
@@ -135,12 +136,10 @@ class ConsoleDisplay(Display):
     def start_listening(self):
         self.client.loop_forever()
 
+    @quit_listener
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()  # "<Entry|Exit>,<temperature>"
         msg_str = data.split(';')  # List[str] := ["<spaces>", "<temperature>", "<time>"]
-
-        if "quit" in message.topic:  # Could use decorator
-            exit()
 
         print("Available Parking Bays:", msg_str[0])
         print("Temperature:", msg_str[1])
@@ -159,4 +158,7 @@ if __name__ == "__main__":
                            car_park_config.create_car_park_display_topic("carpark1"),
                            car_park_config.get_car_park_config("carpark1")["location"]
                            )
+
+    # display = ConsoleDisplay(display_config, car_park_config.create_car_park_display_topic("carpark1"))
+
     display.start_listening()

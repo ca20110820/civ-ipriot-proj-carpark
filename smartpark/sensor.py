@@ -64,6 +64,7 @@ class CLIDetector(Detector):
                 self.exit_sensor.on_car_exit()
             elif user_input in ["q", "Q", "quit"]:
                 self.QUIT_FLAG = True
+                self.entry_sensor.client.publish("quit", "quit")
             else:
                 print("Invalid Input!\n")
                 continue
@@ -76,6 +77,8 @@ class TkDetector(Detector):
 
         self.root = tk.Tk()
         self.root.title("Car Detector ULTRA")
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.btn_incoming_car = tk.Button(
             self.root, text='🚘 Incoming Car', font=('Arial', 50), cursor='right_side', command=self._car_entered)
@@ -93,6 +96,10 @@ class TkDetector(Detector):
 
     def _car_exited(self):
         self.exit_sensor.on_car_exit()
+
+    def on_closing(self):
+        self.entry_sensor.client.publish("quit", "quit")
+        exit()
 
 
 if __name__ == '__main__':
