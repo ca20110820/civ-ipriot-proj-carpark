@@ -84,11 +84,7 @@ class Config:
         return self._car_park_dict_configs
 
     def get_car_park_names(self) -> List[str]:
-        car_park_names = []
-        for car_park_config in self._car_park_dict_configs:
-            car_park_names.append(car_park_config["name"])
-
-        return car_park_names
+        return [car_park_config["name"] for car_park_config in self._car_park_dict_configs]
 
     def _get_common_config(self, car_park_name: str) -> dict:
         # Returns the common config keys: topic-root, host, port
