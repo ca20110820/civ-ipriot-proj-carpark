@@ -109,6 +109,7 @@ class TkGUIDisplay(Display):
         thread = threading.Thread(target=self.client.loop_forever, daemon=True)
         thread.start()
 
+    @quit_listener
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()
 
