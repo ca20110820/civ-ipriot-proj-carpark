@@ -139,7 +139,9 @@ class ConsoleDisplay(Display):
     @quit_listener
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()  # "<Entry|Exit>,<temperature>"
-        msg_str = data.split(';')  # List[str] := ["<spaces>", "<temperature>", "<time>"]
+
+        # ["<available-bays>", "<temperature>", "<time>", "<num-cars>", "<num-parked-cars>", "<num-un-parked-cars>"]
+        msg_str = data.split(';')
 
         print("Available Parking Bays:", msg_str[0])
         print("Temperature:", msg_str[1])

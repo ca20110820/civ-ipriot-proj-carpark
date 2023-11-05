@@ -67,8 +67,18 @@ class CarPark(MqttDevice):
         return self.get_parked_cars() + self.get_un_parked_cars()
 
     def register_sensor_topic(self, sensor_topic: str, *args, **kwargs):
+        if sensor_topic in self._sensor_topics:
+            return
+
         self._sensor_topics.append(sensor_topic)
         self.client.subscribe(sensor_topic, *args, **kwargs)
+
+    def unregister_sensor_topic(self, sensor_topic: str, *args, **kwargs):
+        if sensor_topic not in self._sensor_topics:
+            return
+
+        self._sensor_topics = [topic for topic in self._sensor_topics if topic != sensor_topic]
+        self.client.unsubscribe(sensor_topic, *args, **kwargs)
 
     def add_car(self, car: Car):
         assert self.temperature is not None, "Update the Temperature!"
@@ -83,7 +93,7 @@ class CarPark(MqttDevice):
         self._cars = [c for c in self._cars if c.license_plate != car.license_plate]
 
     def publish_to_display(self):
-        # "<available-bays>;<temperature>;<time>"
+        # "<available-bays>;<temperature>;<time>;<total-cars>;<parked-cars>;<un-parked-cars>"
         msg_str = f"{self.available_bays};" \
                   f"{self.temperature};" \
                   f"{self._entry_or_exit_time.strftime('%Y-%m-%d %H:%M:%S')};"\
@@ -106,20 +116,20 @@ class CarPark(MqttDevice):
         pprint.pprint(print_dict)
 
     def start_serving(self, *args, **kwargs):
-        """Implement the Event Loop"""
+        """Override and Implement the Event Loop"""
         # e.g. self.client.loop_forever()
         raise NotImplementedError()
 
     def on_car_entry(self, *args, **kwargs):
-        """Implement how a new car would be generated and parked"""
+        """Override and Implement how a new car would be generated and parked"""
         raise NotImplementedError()
 
     def on_car_exit(self, *args, **kwargs):
-        """Implement how a car which car would exit and un-park"""
+        """Override and Implement how a car which car would exit and un-park"""
         raise NotImplementedError()
 
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
-        """Implement the Callback as a Subscriber to Sensors"""
+        """Override and Implement the Callback as a Subscriber to Sensors"""
         raise NotImplementedError()
 
 

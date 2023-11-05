@@ -12,7 +12,7 @@ def quit_listener(on_message_callback):
         nonlocal on_disconnect
 
         if not hasattr(self, "quit_topic"):
-            assert isinstance(self, MqttDevice), "Cannot use this decorator on a non-subscriber"
+            assert isinstance(self, MqttDevice), "Cannot use this decorator on a non-MqttDevice"
             setattr(self, "quit_topic", "quit")
             self.client.subscribe("quit")
 

@@ -1,5 +1,3 @@
-""""Demonstrates a simple implementation of an 'event' listener that triggers
-a publication via mqtt"""
 from abc import ABC, abstractmethod
 import tkinter as tk
 import random
@@ -9,7 +7,6 @@ from smartpark.mqtt_device import MqttDevice
 
 
 class Sensor(MqttDevice):
-    # For this simulation, we will instantiate entering cars in the Car Park
     @property
     def temperature(self):
         """Returns the current temperature"""

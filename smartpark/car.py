@@ -18,10 +18,10 @@ class Car:
     def __init__(self, license_plate: str, car_model: str):
         self.license_plate = license_plate
         self.car_model = car_model
-        self.entry_time: datetime | None = None  # .strftime("%Y-%m-%d %H:%M:%S")
+        self.entry_time: datetime | None = None
         self.entry_temperature: float | int | None = None
 
-        self._is_parked: bool = False  # When car is instantiated (i.e. Entered) it not parked by default
+        self._is_parked: bool = False  # When car is instantiated (i.e. Entered) it is not parked by default
 
         self.exit_time: datetime | None = None
         self.exit_temperature: float | int | None = None
@@ -32,7 +32,7 @@ class Car:
 
     @classmethod
     def from_json(cls, car_as_json: str):
-        """Contruct class from JSON String"""
+        """Construct class from JSON String"""
         car_dict: dict = json.loads(car_as_json)
 
         for k, v in car_dict.items():
