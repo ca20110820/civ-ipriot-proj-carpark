@@ -6,7 +6,7 @@ import sys
 import tkinter as tk
 import pprint
 
-from smartpark.utils import quit_listener
+from smartpark.utils import quit_listener, store_message
 from smartpark.config import Config
 from smartpark.mqtt_device import MqttDevice
 
