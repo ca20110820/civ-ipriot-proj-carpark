@@ -1,3 +1,4 @@
+import time
 from abc import ABC, abstractmethod
 import tkinter as tk
 import random
@@ -7,11 +8,18 @@ from smartpark.mqtt_device import MqttDevice
 
 
 class Sensor(MqttDevice):
+
+    _temperature: float
+
     @property
     def temperature(self):
         """Returns the current temperature"""
         # Can get from random number generator, file, or API.
-        raise NotImplementedError()
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value: float):
+        self._temperature = value
 
     def on_detection(self, message: str):
         """Publish to CarPark"""
@@ -99,6 +107,41 @@ class TkDetector(Detector):
         exit()
 
 
+class RandomDetector(Detector):
+    def __init__(self, entry_sensor_config, exit_sensor_config,
+                 lower_bound=20, upper_bound=30, enter_prb=0.55,
+                 min_time_interval=0.3, max_time_interval=1.2
+                 ):
+
+        self.entry_sensor = EntrySensor(entry_sensor_config)
+        self.exit_sensor = ExitSensor(exit_sensor_config)
+
+        self._lower_bound = lower_bound
+        self._upper_bound = upper_bound
+        self._enter_prb = enter_prb
+        self._min_time_interval = min_time_interval
+        self._max_time_interval = max_time_interval
+
+    def start_sensing(self):
+        while True:
+            try:
+                p = self._enter_prb
+                rnd_enter_or_exit = random.choices(["Enter", "Exit"], weights=[p, 1-p], k=1)[0]
+
+                rnd_temperature = random.uniform(self._lower_bound, self._upper_bound)
+                rnd_time_interval = random.uniform(self._min_time_interval, self._max_time_interval)
+                time.sleep(rnd_time_interval)
+
+                if rnd_enter_or_exit == "Enter":
+                    self.entry_sensor.on_detection(f"Enter,{rnd_temperature}")
+                else:
+                    self.exit_sensor.on_detection(f"Exit,{rnd_temperature}")
+            except KeyboardInterrupt:
+                self.entry_sensor.client.publish("quit", "quit")
+                self.exit_sensor.client.publish("quit", "quit")
+                exit()
+
+
 if __name__ == '__main__':
     from smartpark.config import Config
     import os
@@ -106,6 +149,14 @@ if __name__ == '__main__':
     toml_path = os.path.join(os.path.dirname(__file__), "play_config.toml")
 
     config = Config(toml_path)
+
+    # RandomDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
+    #                config.get_sensor_config_dict("carpark1", "sensor2", "exit"),
+    #                lower_bound=20, upper_bound=30, enter_prb=0.6,
+    #                min_time_interval=0.1, max_time_interval=0.5
+    #                ) \
+    #     .start_sensing()
+
     TkDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                config.get_sensor_config_dict("carpark1", "sensor2", "exit")) \
         .start_sensing()
