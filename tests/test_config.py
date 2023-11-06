@@ -1,11 +1,13 @@
 import unittest
 
+import os
+
 from smartpark.config import Config
 
 
 class TestConfigParsing(unittest.TestCase):
     def setUp(self) -> None:
-        self.config = Config(f"./sample_config.toml")
+        self.config = Config(os.path.join(os.path.dirname(__file__), "sample_config.toml"))
 
     def test_car_park1(self):
         car_park_name = "carpark1"

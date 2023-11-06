@@ -1,5 +1,6 @@
 import unittest
 import random
+import os
 
 from smartpark.config import Config
 from smartpark.sensor import Sensor, Detector
@@ -17,7 +18,7 @@ class MockSensor(Sensor):
 
     @staticmethod
     def temperature_generator():
-        with open("./sample_signals.txt", 'r') as file:
+        with open(os.path.join(os.path.dirname(__file__), "sample_signals.txt"), 'r') as file:
             for line in file:
                 yield int(line.rstrip().split(',')[1])
 
@@ -41,7 +42,7 @@ class MockDetector(Detector):
         self.exit_sensor = MockExitSensor(exit_sensor_config)
 
     def start_sensing(self):
-        with open("./sample_signals.txt", "r") as file:
+        with open(os.path.join(os.path.dirname(__file__), "sample_signals.txt"), "r") as file:
             for line in file:
                 line = line.rstrip()
                 signal, temperature = line.split(',')
@@ -55,7 +56,7 @@ class MockDetector(Detector):
 
 class TestSensor(unittest.TestCase):
     def setUp(self) -> None:
-        config = Config("./sample_config.toml")
+        config = Config(os.path.join(os.path.dirname(__file__), "sample_config.toml"))
 
         self.detector = MockDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                                      config.get_sensor_config_dict("carpark1", "sensor2", "exit")
