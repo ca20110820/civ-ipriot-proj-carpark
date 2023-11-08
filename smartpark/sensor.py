@@ -5,6 +5,8 @@ import random
 
 
 from smartpark.mqtt_device import MqttDevice
+from smartpark.logger import class_logger
+from smartpark.project_paths import LOG_DIR
 
 
 class Sensor(MqttDevice):
@@ -54,6 +56,7 @@ class Detector(ABC):
         pass
 
 
+@class_logger(LOG_DIR / 'sensor' / 'cli_detector' / 'sensor.log', 'cli_detector_logger')
 class CLIDetector(Detector):
     def __init__(self, entry_sensor_config: dict, exit_sensor_config: dict):
         self.entry_sensor = EntrySensor(entry_sensor_config)
@@ -65,9 +68,12 @@ class CLIDetector(Detector):
 
             if user_input in ["E", "e", "enter"]:
                 self.entry_sensor.on_car_entry()
+                self.logger.info("Car Entered")
             elif user_input in ["X", "x", "exit"]:
+                self.logger.info("Car Exited")
                 self.exit_sensor.on_car_exit()
             elif user_input in ["q", "Q", "quit"]:
+                self.logger.info("Quit")
                 self.QUIT_FLAG = True
                 self.entry_sensor.client.publish("quit", "quit")
             else:
@@ -75,6 +81,7 @@ class CLIDetector(Detector):
                 continue
 
 
+@class_logger(LOG_DIR / 'sensor' / 'tk_detector' / 'sensor.log', 'tk_detector_logger')
 class TkDetector(Detector):
     def __init__(self, entry_sensor_config, exit_sensor_config):
         self.entry_sensor = EntrySensor(entry_sensor_config)
@@ -94,19 +101,24 @@ class TkDetector(Detector):
         self.btn_outgoing_car.pack(padx=10, pady=5)
 
     def start_sensing(self):
+        self.logger.info("Start Sensing")
         self.root.mainloop()
 
     def _car_entered(self):
+        self.logger.info("Car Entered")
         self.entry_sensor.on_car_entry()
 
     def _car_exited(self):
+        self.logger.info("Car Exited")
         self.exit_sensor.on_car_exit()
 
     def on_closing(self):
+        self.logger.info("Quit")
         self.entry_sensor.client.publish("quit", "quit")
         exit()
 
 
+@class_logger(LOG_DIR / 'sensor' / 'random_detector' / 'sensor.log', 'random_detector_logger')
 class RandomDetector(Detector):
     def __init__(self, entry_sensor_config, exit_sensor_config,
                  lower_bound=20, upper_bound=30, enter_prb=0.55,
@@ -133,10 +145,13 @@ class RandomDetector(Detector):
                 time.sleep(rnd_time_interval)
 
                 if rnd_enter_or_exit == "Enter":
+                    self.logger.info("Car Entered")
                     self.entry_sensor.on_detection(f"Enter,{rnd_temperature}")
                 else:
+                    self.logger.info("Car Exited")
                     self.exit_sensor.on_detection(f"Exit,{rnd_temperature}")
             except KeyboardInterrupt:
+                self.logger.info("KeyboardInterrupt - Quit")
                 self.entry_sensor.client.publish("quit", "quit")
                 self.exit_sensor.client.publish("quit", "quit")
                 exit()

@@ -8,6 +8,8 @@ from datetime import datetime
 from smartpark.utils import quit_listener
 from smartpark.mqtt_device import MqttDevice
 from smartpark.car import Car
+from smartpark.logger import class_logger
+from smartpark.project_paths import LOG_DIR
 
 
 class CarPark(MqttDevice):
@@ -133,47 +135,55 @@ class CarPark(MqttDevice):
         raise NotImplementedError()
 
 
+@class_logger(LOG_DIR / 'car_park' / 'car_park.log', 'car_park_logger')
 class SimulatedCarPark(CarPark):
     def start_serving(self):
+        self.logger.info(f"Car Park Start Serving ...")
         # e.g. self.client.loop_forever()
         self.client.loop_forever()
 
     def on_car_entry(self):
-        # TODO: Print and Log
         # Generate a Random Car
         car = Car.generate_random_car(["ModelA", "ModelB", "ModelC"])
 
         self.add_car(car)
+        self.logger.info(f"Car Entered - {car.to_json_format()}")
 
         if self.available_bays > 0:  # If there are available bay(s), park the car immediately
             car.car_parked()
             assert self._cars[-1].is_parked, "The recently added car failed to park!"
+            self.logger.info(f"Car '{car}' got parked")
 
         print(car.to_json_format(indent=4))
         self.publish_to_display()
 
     def on_car_exit(self):
-        # TODO: Print and Log
         # Select random car (parked or un-parked) to exit.
         all_cars = self.get_all_cars()
         car: Car | None = random.choice(all_cars) if len(all_cars) > 0 else None
 
         if car is not None:
             car.car_unparked()  # Un-park the car regardless if it's parked or not!
+            self.logger.info(f"Car '{car}' got un-parked")
             self.remove_car(car)
+            self.logger.info(f"Car Exited - {car.to_json_format()}")
             print(car.to_json_format(indent=4))
             self.publish_to_display()
         else:
+            self.logger.warning(f"Exiting while there's no cars in Car Park")
             print("There are no cars in the park to exit!")
 
     @quit_listener
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         msg = message.payload.decode()
 
+        self.logger.info(f"Message Received - {msg}")
+
         try:
             signal, self.temperature = msg.split(",")
         except Exception as e:
             print(e)
+            self.logger.error(str(e))
             return
 
         if signal == "Enter":

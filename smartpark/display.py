@@ -7,8 +7,9 @@ import tkinter as tk
 import pprint
 
 from smartpark.utils import quit_listener, store_message
-from smartpark.config import Config
 from smartpark.mqtt_device import MqttDevice
+from smartpark.logger import class_logger
+from smartpark.project_paths import LOG_DIR
 
 
 class Display(MqttDevice):
@@ -87,6 +88,7 @@ class WindowedDisplay:
         self.window.update()
 
 
+@class_logger(LOG_DIR / 'display' / 'tk_display' / 'display.log', 'tk_display_logger')
 class TkGUIDisplay(Display):
     fields = ['Available Bays',
               'Temperature',
@@ -99,15 +101,15 @@ class TkGUIDisplay(Display):
     def __init__(self, config: dict, display_topic: str, window_title: str = "<Title>"):
         super().__init__(config, display_topic)
 
-        self.start_listening()
-
         self.window = WindowedDisplay(window_title, TkGUIDisplay.fields)
-        self.window.show()
 
     def start_listening(self):
         """Define the Event Loop"""
         thread = threading.Thread(target=self.client.loop_forever, daemon=True)
         thread.start()
+        self.logger.info(f"Fired-up Non-blocking thread for {self.__class__.__name__}")
+
+        self.window.show()
 
     @quit_listener
     @store_message()
@@ -116,6 +118,8 @@ class TkGUIDisplay(Display):
 
         # ["<available-bays>", "<temperature>", "<time>", "<num-cars>", "<num-parked-cars>", "<num-un-parked-cars>"]
         msg_str = data.split(';')
+
+        self.logger.info(f"Message Received - {msg_str}")
 
         field_values = dict(zip(TkGUIDisplay.fields, [
             f'{msg_str[0]}',
@@ -130,12 +134,14 @@ class TkGUIDisplay(Display):
         self.window.update(field_values)
 
 
+@class_logger(LOG_DIR / 'display' / 'console_display' / 'display.log', 'console_display_logger')
 class ConsoleDisplay(Display):
     def __init__(self, config: dict, display_topic: str, *args, **kwargs):
         super().__init__(config, display_topic, *args, **kwargs)
         self.start_listening()
 
     def start_listening(self):
+        self.logger.info(f"Started Listening ...")
         self.client.loop_forever()
 
     @quit_listener
@@ -145,6 +151,8 @@ class ConsoleDisplay(Display):
 
         # ["<available-bays>", "<temperature>", "<time>", "<num-cars>", "<num-parked-cars>", "<num-un-parked-cars>"]
         msg_str = data.split(';')
+
+        self.logger.info(f"Message Received - {msg_str}")
 
         print("Available Parking Bays:", msg_str[0])
         print("Temperature:", msg_str[1])
