@@ -3,6 +3,7 @@ import os
 
 import paho.mqtt.client as paho
 from smartpark.mqtt_device import MqttDevice
+from smartpark.project_paths import DATA_DIR
 
 
 def quit_listener(on_message_callback):
@@ -32,7 +33,7 @@ def quit_listener(on_message_callback):
     return wrapper
 
 
-def store_message(file_path: str = os.path.join(os.path.dirname(__file__), "display_messages.txt")):
+def store_message(file_path: str = DATA_DIR / "display_messages.txt"):
     def inner(on_message_callback):
         @wraps(on_message_callback)
         def wrapper(self, client: paho.Client, userdata, message):

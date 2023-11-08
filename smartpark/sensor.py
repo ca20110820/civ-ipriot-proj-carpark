@@ -144,9 +144,9 @@ class RandomDetector(Detector):
 
 if __name__ == '__main__':
     from smartpark.config import Config
-    import os
+    from smartpark.project_paths import PROJECT_ROOT_DIR
 
-    toml_path = os.path.join(os.path.dirname(__file__), "play_config.toml")
+    toml_path = PROJECT_ROOT_DIR / 'configurations' / 'sample_smartpark_config.toml'
 
     config = Config(toml_path)
 

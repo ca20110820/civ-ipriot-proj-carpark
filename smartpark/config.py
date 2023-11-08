@@ -54,6 +54,9 @@ name = "display2"
 from typing import List
 import toml
 import pprint
+import os
+
+from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
 class Config:
@@ -191,7 +194,7 @@ class Config:
 
 
 if __name__ == "__main__":
-    config = Config(f"./play_config.toml")
+    config = Config(PROJECT_ROOT_DIR / 'configurations' / 'sample_smartpark_config.toml')
 
     car_park = "carpark1"
 

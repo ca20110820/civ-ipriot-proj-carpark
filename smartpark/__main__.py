@@ -3,11 +3,11 @@ import subprocess
 import os
 import sys
 
-import smartpark
+from smartpark.project_paths import SMART_PARK_DIR
 
 
 def run_script(script_name):
-    subprocess.run([sys.executable, os.path.join(os.path.dirname(smartpark.__file__), script_name)])
+    subprocess.run([sys.executable, SMART_PARK_DIR / script_name])
 
 
 if __name__ == "__main__":

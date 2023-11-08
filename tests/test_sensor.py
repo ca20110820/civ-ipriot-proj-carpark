@@ -4,6 +4,7 @@ import os
 
 from smartpark.config import Config
 from smartpark.sensor import Sensor, Detector
+from smartpark.project_paths import CONFIG_DIR
 
 
 random.seed(0)  # Seed=0 & SampleSize=30 & min_temperature=20 & max_temperature=30
@@ -56,7 +57,7 @@ class MockDetector(Detector):
 
 class TestSensor(unittest.TestCase):
     def setUp(self) -> None:
-        config = Config(os.path.join(os.path.dirname(__file__), "sample_config.toml"))
+        config = Config(CONFIG_DIR / 'sample_smartpark_config.toml')
 
         self.detector = MockDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                                      config.get_sensor_config_dict("carpark1", "sensor2", "exit")

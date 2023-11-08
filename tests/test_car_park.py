@@ -10,6 +10,7 @@ from smartpark.config import Config
 from smartpark.carpark import SimulatedCarPark, CarPark
 from smartpark.sensor import Sensor, Detector
 from smartpark.car import Car
+from smartpark.project_paths import CONFIG_DIR
 
 
 random.seed(0)
@@ -59,7 +60,7 @@ class MockCarPark(CarPark):
 
 class TestCarPark(unittest.TestCase):
     def setUp(self) -> None:
-        self.config = Config(os.path.join(os.path.dirname(__file__), "sample_config.toml"))
+        self.config = Config(CONFIG_DIR / 'sample_smartpark_config.toml')
         self.car_park = MockCarPark(self.config.get_car_park_config("carpark1"))
         self.detector = MockDetector()
         self.fixed_num_bays = 5

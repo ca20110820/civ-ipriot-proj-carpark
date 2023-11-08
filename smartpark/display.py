@@ -110,6 +110,7 @@ class TkGUIDisplay(Display):
         thread.start()
 
     @quit_listener
+    @store_message()
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()
 
@@ -138,6 +139,7 @@ class ConsoleDisplay(Display):
         self.client.loop_forever()
 
     @quit_listener
+    @store_message()
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()  # "<Entry|Exit>,<temperature>"
 
@@ -155,9 +157,9 @@ class ConsoleDisplay(Display):
 
 if __name__ == "__main__":
     from smartpark.config import Config
-    import os
+    from smartpark.project_paths import PROJECT_ROOT_DIR
 
-    toml_path = os.path.join(os.path.dirname(__file__), "play_config.toml")
+    toml_path = PROJECT_ROOT_DIR / 'configurations' / 'sample_smartpark_config.toml'
 
     car_park_config = Config(toml_path)
     display_config = car_park_config.get_display_configs("carpark1")[0]
