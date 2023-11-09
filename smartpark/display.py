@@ -146,7 +146,7 @@ class TkGUIDisplay(Display):
 
         field_values = dict(zip(TkGUIDisplay.fields, [
             f'{msg_str[0]}',
-            f'{msg_str[1]}℃',
+            f'{float(msg_str[1]):.2f}℃',
             f'{msg_str[2]}',
             f'{msg_str[3]}',
             f'{msg_str[4]}',
