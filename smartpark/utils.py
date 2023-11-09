@@ -1,13 +1,11 @@
-from functools import wraps
 import os
 
 import paho.mqtt.client as paho
 from smartpark.mqtt_device import MqttDevice
-from smartpark.project_paths import DATA_DIR
 
 
 def quit_listener(on_message_callback):
-
+    """Closing MQTT Client for Subscribers"""
     def wrapper(self, client: paho.Client, userdata, message):
 
         if not hasattr(self, "quit_topic"):
@@ -31,28 +29,6 @@ def quit_listener(on_message_callback):
 
         on_message_callback(self, client, userdata, message)
     return wrapper
-
-
-def store_message(file_path: str = DATA_DIR / "display_messages.txt"):
-    def inner(on_message_callback):
-        @wraps(on_message_callback)
-        def wrapper(self, client: paho.Client, userdata, message):
-            msg: str = message.payload.decode()
-
-            # Message: "<available-bays>,<temperature>,<time>,<num-cars>,<num-parked-cars>,<num-un-parked-cars>"
-            msg_split = msg.split(";")
-
-            if len(msg_split) > 1:
-                data = ",".join(msg_split)  # Could have standardized to comma but it's fine
-
-                create_path_if_not_exists(file_path)
-
-                with open(file_path, 'a') as file:
-                    file.write(data + "\n")
-
-            return on_message_callback(self, client, userdata, message)
-        return wrapper
-    return inner
 
 
 def create_path_if_not_exists(file_path: str):

@@ -1,15 +1,38 @@
 from abc import abstractmethod
 from typing import Any, Iterable
+from functools import wraps
 import paho.mqtt.client as paho
 import threading
-import sys
 import tkinter as tk
 import pprint
 
-from smartpark.utils import quit_listener, store_message
+from smartpark.utils import quit_listener, create_path_if_not_exists
 from smartpark.mqtt_device import MqttDevice
 from smartpark.logger import class_logger
-from smartpark.project_paths import LOG_DIR
+from smartpark.project_paths import LOG_DIR, DATA_DIR
+
+
+def store_message(file_path: str):
+    """Store Messages/Data Received from Car Park"""
+    def inner(on_message_callback):
+        @wraps(on_message_callback)
+        def wrapper(self, client: paho.Client, userdata, message):
+            msg: str = message.payload.decode()
+
+            # Message: "<available-bays>,<temperature>,<time>,<num-cars>,<num-parked-cars>,<num-un-parked-cars>"
+            msg_split = msg.split(";")
+
+            if len(msg_split) > 1:
+                data = ",".join(msg_split)  # Could have standardized to comma but it's fine
+
+                create_path_if_not_exists(file_path)
+
+                with open(file_path, 'a') as file:
+                    file.write(data + "\n")
+
+            return on_message_callback(self, client, userdata, message)
+        return wrapper
+    return inner
 
 
 class Display(MqttDevice):
@@ -112,7 +135,7 @@ class TkGUIDisplay(Display):
         self.window.show()
 
     @quit_listener
-    @store_message()
+    @store_message(DATA_DIR / "display_messages.txt")
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()
 
@@ -145,7 +168,7 @@ class ConsoleDisplay(Display):
         self.client.loop_forever()
 
     @quit_listener
-    @store_message()
+    @store_message(DATA_DIR / "display_messages.txt")
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
         data = message.payload.decode()  # "<Entry|Exit>,<temperature>"
 
