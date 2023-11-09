@@ -7,6 +7,7 @@ import os
 import json
 
 from smartpark.project_paths import LOG_DIR
+from smartpark.utils import create_path_if_not_exists
 
 
 def get_logger(log_filepath, logger_name,
@@ -28,12 +29,7 @@ def class_logger(log_filepath: str, logger_name: str, *logger_args, **logger_kwa
         @wraps(cls)
         def wrapper(*args, **kwargs):
 
-            if not os.path.exists(log_filepath):
-                try:
-                    os.makedirs(os.path.dirname(log_filepath), exist_ok=True)
-                    open(log_filepath, 'a').close()
-                except OSError as e:
-                    print(f"Error: {e}")
+            create_path_if_not_exists(log_filepath)
 
             instance = cls(*args, **kwargs)
             logger = get_logger(log_filepath, logger_name, *logger_args, **logger_kwargs)

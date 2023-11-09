@@ -44,9 +44,21 @@ def store_message(file_path: str = DATA_DIR / "display_messages.txt"):
 
             if len(msg_split) > 1:
                 data = ",".join(msg_split)  # Could have standardized to comma but it's fine
+
+                create_path_if_not_exists(file_path)
+
                 with open(file_path, 'a') as file:
                     file.write(data + "\n")
 
             return on_message_callback(self, client, userdata, message)
         return wrapper
     return inner
+
+
+def create_path_if_not_exists(file_path: str):
+    if not os.path.exists(file_path):
+        try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            open(file_path, 'a').close()
+        except OSError as e:
+            print(f"Error: {e}")
