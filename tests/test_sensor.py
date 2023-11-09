@@ -13,18 +13,17 @@ random.seed(0)  # Seed=0 & SampleSize=30 & min_temperature=20 & max_temperature=
 class MockSensor(Sensor):
     TEMPERATURE_GENERATOR = None
 
-    @property
-    def temperature(self):
+    def temperature_generator(self) -> float | int:
         return next(MockSensor.TEMPERATURE_GENERATOR)
 
     @staticmethod
-    def temperature_generator():
+    def mock_temperature_generator():
         with open(os.path.join(os.path.dirname(__file__), "sample_signals.txt"), 'r') as file:
             for line in file:
                 yield int(line.rstrip().split(',')[1])
 
 
-MockSensor.TEMPERATURE_GENERATOR = MockSensor.temperature_generator()
+MockSensor.TEMPERATURE_GENERATOR = MockSensor.mock_temperature_generator()
 
 
 class MockEntrySensor(MockSensor):
@@ -74,6 +73,7 @@ class TestSensor(unittest.TestCase):
             rnd_message = f"{rnd_enter_or_exit},{rnd_temperature}"
 
             self.assertEqual(rnd_message, message)
+            self.assertEqual(len(message.split(',')), 2)
             enter_or_exit, temperature = message.split(',')
             self.assertIn(enter_or_exit, ['Enter', 'Exit'])
             self.assertLessEqual(float(temperature), 30)
