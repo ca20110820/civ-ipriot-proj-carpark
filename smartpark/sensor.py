@@ -10,40 +10,36 @@ from smartpark.project_paths import LOG_DIR
 
 
 class Sensor(MqttDevice):
-
-    _temperature: float
-
     @property
     def temperature(self):
         """Returns the current temperature"""
         # Can get from random number generator, file, or API.
-        return self._temperature
-
-    @temperature.setter
-    def temperature(self, value: float):
-        self._temperature = value
+        return self.temperature_generator()
 
     def on_detection(self, message: str):
         """Publish to CarPark"""
         self.client.publish(self.topic_address, message)
 
+    def temperature_generator(self) -> float | int:
+        """Implement How a Temperature is Generated. e.g. Random number generator, File, or API"""
+        raise NotImplementedError()
+
 
 class EntrySensor(Sensor):
-    @property
-    def temperature(self):
-        return random.randint(20, 30)
 
     def on_car_entry(self):
         self.on_detection(f"Enter,{self.temperature}")
 
-
-class ExitSensor(Sensor):
-    @property
-    def temperature(self):
+    def temperature_generator(self):
         return random.randint(20, 30)
 
+
+class ExitSensor(Sensor):
     def on_car_exit(self):
         self.on_detection(f"Exit,{self.temperature}")
+
+    def temperature_generator(self):
+        return random.randint(20, 30)
 
 
 class Detector(ABC):
