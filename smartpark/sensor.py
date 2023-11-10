@@ -1,3 +1,4 @@
+from typing import Generator
 import time
 from abc import ABC, abstractmethod
 import tkinter as tk
@@ -47,7 +48,7 @@ class Detector(ABC):
     QUIT_FLAG = False
 
     @abstractmethod
-    def start_sensing(self):
+    def start_sensing(self, *args, **kwargs):
         """Define Event Loop"""
         pass
 
@@ -112,6 +113,68 @@ class TkDetector(Detector):
         self.logger.info("Quit")
         self.entry_sensor.client.publish("quit", "quit")
         exit()
+
+
+class FileSensor(Sensor):
+
+    TEMPERATURE_GENERATOR: Generator = None
+
+    def temperature_generator(self) -> float | int:
+        # return next(FileDetector.FileSensor.TEMPERATURE_GENERATOR)
+        return next(self.TEMPERATURE_GENERATOR)
+
+    @staticmethod
+    def create_temperature_generator(file_path: str):
+        with open(file_path, 'r') as file:
+            for line in file:
+                yield float(line.rstrip().split(',')[1])
+
+    def register_temperature_generator(self, inp_generator: Generator):
+        self.TEMPERATURE_GENERATOR = inp_generator
+
+
+class FileEntrySensor(FileSensor):
+    def on_car_entry(self):
+        return f"Enter,{self.temperature}"
+
+
+class FileExitSensor(FileSensor):
+    def on_car_exit(self):
+        return f"Exit,{self.temperature}"
+
+
+class FileDetector(Detector):
+    def __init__(self, entry_sensor_config: dict, exit_sensor_config: dict,
+                 enter_exit_temperature_filepath: str
+                 ):
+        # Format: "<Enter|Exit>,<temperature>"
+
+        self._file_path = enter_exit_temperature_filepath
+
+        # Need to be instantiated outside, then attach to file entry and exit sensors
+        temperature_generator = FileSensor.create_temperature_generator(self._file_path)
+
+        self.entry_sensor = FileEntrySensor(entry_sensor_config)
+        self.exit_sensor = FileExitSensor(exit_sensor_config)
+
+        # self.entry_sensor.TEMPERATURE_GENERATOR = self.exit_sensor.TEMPERATURE_GENERATOR = temperature_generator
+        self.entry_sensor.register_temperature_generator(temperature_generator)
+        self.exit_sensor.register_temperature_generator(temperature_generator)
+
+    def start_sensing(self, use_quit=True):
+        with open(self._file_path, 'r') as file:
+            for line in file:
+                line = line.rstrip()
+                enter_or_exit, temperature = line.split(',')
+                if enter_or_exit == 'Enter':
+                    self.entry_sensor.on_car_entry()
+                elif enter_or_exit == 'Exit':
+                    self.exit_sensor.on_car_exit()
+                else:
+                    if use_quit:
+                        self.entry_sensor.client.publish("quit", "quit")
+                        self.exit_sensor.client.publish("quit", "quit")
+                    print("Done Sensing from File!")
 
 
 @class_logger(LOG_DIR / 'sensor' / 'random_detector' / 'sensor.log', 'random_detector_logger')
