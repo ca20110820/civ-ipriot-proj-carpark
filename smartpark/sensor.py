@@ -145,9 +145,11 @@ class FileExitSensor(FileSensor):
 
 class FileDetector(Detector):
     def __init__(self, entry_sensor_config: dict, exit_sensor_config: dict,
-                 enter_exit_temperature_filepath: str
+                 enter_exit_temperature_filepath: str,
+                 use_yield: bool = False
                  ):
         # Format: "<Enter|Exit>,<temperature>"
+        self._use_yield = use_yield
 
         self._file_path = enter_exit_temperature_filepath
 
@@ -175,6 +177,10 @@ class FileDetector(Detector):
                         self.entry_sensor.client.publish("quit", "quit")
                         self.exit_sensor.client.publish("quit", "quit")
                     print("Done Sensing from File!")
+                    break
+
+                if self._use_yield:
+                    yield enter_or_exit, float(temperature)
 
 
 @class_logger(LOG_DIR / 'sensor' / 'random_detector' / 'sensor.log', 'random_detector_logger')
