@@ -86,8 +86,7 @@ class TestFileDetector(unittest.TestCase):
 
         self.detector = FileDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                                      config.get_sensor_config_dict("carpark1", "sensor2", "exit"),
-                                     PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt',
-                                     use_yield=True
+                                     PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt'
                                      )
 
     def test_detection(self):

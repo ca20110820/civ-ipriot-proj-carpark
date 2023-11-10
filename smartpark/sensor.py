@@ -135,21 +135,19 @@ class FileSensor(Sensor):
 
 class FileEntrySensor(FileSensor):
     def on_car_entry(self):
-        return f"Enter,{self.temperature}"
+        self.on_detection(f"Enter,{self.temperature}")
 
 
 class FileExitSensor(FileSensor):
     def on_car_exit(self):
-        return f"Exit,{self.temperature}"
+        self.on_detection(f"Exit,{self.temperature}")
 
 
 class FileDetector(Detector):
     def __init__(self, entry_sensor_config: dict, exit_sensor_config: dict,
-                 enter_exit_temperature_filepath: str,
-                 use_yield: bool = False
+                 enter_exit_temperature_filepath: str
                  ):
         # Format: "<Enter|Exit>,<temperature>"
-        self._use_yield = use_yield
 
         self._file_path = enter_exit_temperature_filepath
 
@@ -165,13 +163,20 @@ class FileDetector(Detector):
 
     def start_sensing(self, use_quit=True):
         with open(self._file_path, 'r') as file:
-            for line in file:
-                line = line.rstrip()
+            for line in file.readlines():
+                line = line.strip()
                 enter_or_exit, temperature = line.split(',')
+
+                # rnd_time_interval = random.uniform(0.05, 0.55)
+                # time.sleep(rnd_time_interval)
+                # time.sleep(1)
+
                 if enter_or_exit == 'Enter':
                     self.entry_sensor.on_car_entry()
+                    # self.entry_sensor.on_detection(f"Enter,{temperature}")
                 elif enter_or_exit == 'Exit':
                     self.exit_sensor.on_car_exit()
+                    # self.exit_sensor.on_detection(f"Exit,{temperature}")
                 else:
                     if use_quit:
                         self.entry_sensor.client.publish("quit", "quit")
@@ -179,8 +184,7 @@ class FileDetector(Detector):
                     print("Done Sensing from File!")
                     break
 
-                if self._use_yield:
-                    yield enter_or_exit, float(temperature)
+                yield enter_or_exit, float(temperature)
 
 
 @class_logger(LOG_DIR / 'sensor' / 'random_detector' / 'sensor.log', 'random_detector_logger')
@@ -236,6 +240,13 @@ if __name__ == '__main__':
     #                min_time_interval=0.1, max_time_interval=0.5
     #                ) \
     #     .start_sensing()
+
+    # detector = FileDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
+    #                         config.get_sensor_config_dict("carpark1", "sensor2", "exit"),
+    #                         PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt',
+    #                         )
+    # for s, t in detector.start_sensing():
+    #     print(f"{s},{t}")
 
     TkDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                config.get_sensor_config_dict("carpark1", "sensor2", "exit")) \
