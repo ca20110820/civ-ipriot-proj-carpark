@@ -1,0 +1,20 @@
+[[car_parks]]
+name = "carpark"
+location = "Some Random Location in WA"
+host = "localhost"
+port = 1883
+topic-root = "carpark"
+total_bays = 20
+
+[[car_parks.sensors]]
+name = "sensor1"
+location = "L400"
+type = "entry"
+
+[[car_parks.sensors]]
+name = "sensor2"
+location = "L400"
+type = "exit"
+
+[[car_parks.displays]]
+name = "display1"
