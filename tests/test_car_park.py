@@ -60,10 +60,11 @@ class MockCarPark(CarPark):
 
 class TestCarPark(unittest.TestCase):
     def setUp(self) -> None:
+        self.car_park_name = "carpark1"
         self.config = Config(CONFIG_DIR / 'sample_smartpark_config.toml')
-        self.car_park = MockCarPark(self.config.get_car_park_config("carpark1"))
+        self.car_park = MockCarPark(self.config.get_car_park_config(self.car_park_name))
         self.detector = MockDetector()
-        self.fixed_num_bays = 5
+        self.fixed_num_bays = self.config.get_car_park_config(self.car_park_name)["total_bays"]
 
     def test_on_message(self):
         for enter_or_exit, temperature in self.detector.start_sensing():
