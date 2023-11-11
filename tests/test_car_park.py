@@ -31,14 +31,18 @@ class MockCarPark(CarPark):
         pass
 
     def on_car_entry(self):
+        # Generate a Random Car
         car = Car.generate_random_car(["ModelA", "ModelB", "ModelC"])
 
-        self.add_car(car)
+        self.add_car(car)  # By default, this will be un-parked, thus there will be at least 1 un-parked car(s)
 
-        if self.available_bays > 0:  # If there are available bay(s), park the car immediately
-            car.car_parked()
-            assert self._cars[-1].is_parked, "The recently added car failed to park!"
+        if self.available_bays > 0:  # If there are available bay(s)
+            # Select a Car to be parked, car who just entered or un-parked car(s)
+            car_to_park = random.choice(self.get_un_parked_cars())
+            car_to_park.car_parked()
+
         self.publish_to_display()
+        # Only return the car who just entered, not parked
         return car
 
     def on_car_exit(self):
@@ -89,8 +93,6 @@ class TestCarPark(unittest.TestCase):
                 else:
                     self.assertGreaterEqual(self.car_park.un_parked_cars, 1)
 
-                if self.car_park.available_bays > 0:
-                    self.assertTrue(car.is_parked)
             elif enter_or_exit == "Exit":
                 self.car_park.temperature = temperature
                 car: Car | None = self.car_park.on_car_exit()
