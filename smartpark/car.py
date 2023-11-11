@@ -6,14 +6,15 @@ import json
 
 
 class Car:
-    """
+    """Representation of a Car.
+
     Car Data:
-    - license_plate
-    - car_model
-    - entry_time
-    - entry_temperature
-    - exit_time
-    - exit_temperature
+        - license_plate
+        - car_model
+        - entry_time
+        - entry_temperature
+        - exit_time
+        - exit_temperature
     """
     def __init__(self, license_plate: str, car_model: str):
         self.license_plate = license_plate
@@ -32,7 +33,7 @@ class Car:
 
     @classmethod
     def from_json(cls, car_as_json: str):
-        """Construct class from JSON String"""
+        """Construct Car from JSON String"""
         car_dict: dict = json.loads(car_as_json)
 
         for k, v in car_dict.items():
@@ -65,6 +66,7 @@ class Car:
 
     @classmethod
     def from_csv(cls, car_as_csv: str):
+        """Construct Car from CSV String"""
         car_str_list = car_as_csv.split(",")
 
         for i in range(len(car_str_list)):
@@ -95,22 +97,30 @@ class Car:
         return f"{self.license_plate} - {self.car_model}"
 
     def car_parked(self):
+        """Update Parking Status of Car to 'Parked'"""
         self._is_parked = True
 
     def car_unparked(self):
+        """Update Parking Status of Car to 'Un-Parked'"""
         self._is_parked = False
 
     def entered_car_park(self, temperature: float):
+        """Call when a Car Entered the Park"""
         # Warn: Make sure to check if there is available bay before changing parked state
         self.entry_time = datetime.now()
         self.entry_temperature = float(temperature)
 
     def exited_car_park(self, temperature: float):
+        """Call when a Car Exited the Park"""
         self.car_unparked()  # Update the State of Car to Un-parked
         self.exit_time = datetime.now()
         self.exit_temperature = float(temperature)
 
     def to_csv_format(self):
+        """Convert the Car Properties/Fields to CSV String.
+
+        Useful for passing the Car's States over a Network.
+        """
         item_list = [self.license_plate,
                      self.car_model,
                      self.entry_time.strftime("%Y-%m-%d %H:%M:%S") if self.entry_time is not None else "null",
@@ -125,6 +135,10 @@ class Car:
         return ",".join(item_list)
 
     def to_json_format(self, **kwargs):
+        """Convert the Car Properties/Fields to JSON String.
+
+        Useful for passing the Car's States over a Network.
+        """
         out_json = {"license_plate": self.license_plate,
                     "car_model": self.car_model,
                     "entry_time": self._get_datetime_as_str("entry_time"),
@@ -137,6 +151,7 @@ class Car:
         return json.dumps(out_json, sort_keys=False, default=str, **kwargs)
 
     def _get_datetime_as_str(self, entry_or_exit: str) -> str | None:
+        """Clean and Convert Datetime as String with standard format Y-m-d H:M:S"""
         if entry_or_exit not in ["entry_time", "exit_time"]:
             raise ValueError("entry_or_exit must be 'entry_time' or 'exit_time'")
 
@@ -149,6 +164,7 @@ class Car:
 
     @staticmethod
     def generate_random_license_plate():
+        """Generate Random Car License Plate"""
         format_string = random.choice(["LLL-NNN", "NLL-NNN", "NLLL-NNN", "LL-NNNN", "TAXI-NNNN", "LLL-NNNN"])
 
         letters = ''.join(random.choice(string.ascii_uppercase) for _ in range(format_string.count("L")))
@@ -167,10 +183,12 @@ class Car:
 
     @staticmethod
     def generate_random_car_model(model_list):
+        """Generate Random Car Model from a given list"""
         return random.choice(model_list)
 
     @classmethod
     def generate_random_car(cls, car_model_list):
+        """Generate Random Car instance with a random car model from a list"""
         rnd_license_plate = cls.generate_random_license_plate()
         rnd_car_model = cls.generate_random_car_model(car_model_list)
         return cls(rnd_license_plate, rnd_car_model)

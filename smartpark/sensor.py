@@ -11,6 +11,7 @@ from smartpark.project_paths import LOG_DIR
 
 
 class Sensor(MqttDevice):
+    """Base Class for Sensors. It follows the Publisher Pattern, but can include (infinite) event loop."""
     @property
     def temperature(self):
         """Returns the current temperature"""
@@ -18,11 +19,11 @@ class Sensor(MqttDevice):
         return self.temperature_generator()
 
     def on_detection(self, message: str):
-        """Publish to CarPark"""
+        """Publish Message to CarPark"""
         self.client.publish(self.topic_address, message)
 
     def temperature_generator(self) -> float | int:
-        """Implement How a Temperature is Generated. e.g. Random number generator, File, or API"""
+        """Override and Implement How a Temperature is Generated. e.g. Random number generator, File, or API"""
         raise NotImplementedError()
 
 
@@ -44,12 +45,14 @@ class ExitSensor(Sensor):
 
 
 class Detector(ABC):
+    """Base Class for Detectors. Separated from Sensor class to create a composition of Sensors: Entry, Exit, or Both.
+    """
 
-    QUIT_FLAG = False
+    QUIT_FLAG = False  # Optional Quit Flag
 
     @abstractmethod
     def start_sensing(self, *args, **kwargs):
-        """Define Event Loop"""
+        """Override and Implement Sensing Loop."""
         pass
 
 
@@ -149,6 +152,8 @@ class FileDetector(Detector):
                  ):
         # Format: "<Enter|Exit>,<temperature>"
 
+        # Note: Could have implemented alone without FileSensor.
+
         self._file_path = enter_exit_temperature_filepath
 
         # Need to be instantiated outside, then attach to file entry and exit sensors
@@ -157,7 +162,6 @@ class FileDetector(Detector):
         self.entry_sensor = FileEntrySensor(entry_sensor_config)
         self.exit_sensor = FileExitSensor(exit_sensor_config)
 
-        # self.entry_sensor.TEMPERATURE_GENERATOR = self.exit_sensor.TEMPERATURE_GENERATOR = temperature_generator
         self.entry_sensor.register_temperature_generator(temperature_generator)
         self.exit_sensor.register_temperature_generator(temperature_generator)
 
@@ -173,10 +177,8 @@ class FileDetector(Detector):
 
                 if enter_or_exit == 'Enter':
                     self.entry_sensor.on_car_entry()
-                    # self.entry_sensor.on_detection(f"Enter,{temperature}")
                 elif enter_or_exit == 'Exit':
                     self.exit_sensor.on_car_exit()
-                    # self.exit_sensor.on_detection(f"Exit,{temperature}")
                 else:
                     if use_quit:
                         self.entry_sensor.client.publish("quit", "quit")

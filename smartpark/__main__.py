@@ -7,6 +7,7 @@ from smartpark.project_paths import SMART_PARK_DIR
 
 
 def run_script(script_name):
+    """Run a Python Script"""
     subprocess.run([sys.executable, SMART_PARK_DIR / script_name])
 
 

@@ -13,7 +13,10 @@ from smartpark.project_paths import LOG_DIR, DATA_DIR
 
 
 def store_message(file_path: str):
-    """Store Messages/Data Received from Car Park"""
+    """Store Messages/Data Received from Car Park.
+
+    Decorator for the MQTT on_message() callback.
+    """
     def inner(on_message_callback):
         @wraps(on_message_callback)
         def wrapper(self, client: paho.Client, userdata, message):
@@ -23,7 +26,7 @@ def store_message(file_path: str):
             msg_split = msg.split(";")
 
             if len(msg_split) > 1:
-                data = ",".join(msg_split)  # Could have standardized to comma but it's fine
+                data = ",".join(msg_split)
 
                 create_path_if_not_exists(file_path)
 
@@ -36,21 +39,24 @@ def store_message(file_path: str):
 
 
 class Display(MqttDevice):
+    """Base Class for Displays. It follows the Subscriber pattern.
+    """
     def __init__(self, config: dict, display_topic: str, *args, **kwargs):
         super().__init__(config, *args, **kwargs)
 
-        self.display_topic = display_topic
+        self.display_topic = display_topic  # Display topic from Car Park class
 
         self.client.subscribe(self.display_topic)
         self.client.on_message = self.on_message
 
     @abstractmethod
     def start_listening(self, *args, **kwargs):
+        """Override and Implement the Event Loop. This method can contain implementation for 'show'"""
         pass
 
     @abstractmethod
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):
-        """Implement Event-handler"""
+        """Override and Implement the Callback as a Subscriber to Car Park"""
         pass
 
 
@@ -127,7 +133,6 @@ class TkGUIDisplay(Display):
         self.window = WindowedDisplay(window_title, TkGUIDisplay.fields)
 
     def start_listening(self):
-        """Define the Event Loop"""
         thread = threading.Thread(target=self.client.loop_forever, daemon=True)
         thread.start()
         self.logger.info(f"Fired-up Non-blocking thread for {self.__class__.__name__}")

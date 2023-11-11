@@ -12,7 +12,7 @@ from smartpark.utils import create_path_if_not_exists
 
 def get_logger(log_filepath, logger_name,
                logging_level=logging.DEBUG, max_bytes=1048576, *args, **kwargs):
-
+    """Returns a Logger. Uses RotatingFileHandler."""
     # Example: get_logger("car_park.txt", "car_park_logger", logging_level=logging.DEBUG)
     handler = RotatingFileHandler(log_filepath, maxBytes=max_bytes, *args, **kwargs)
     formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] | %(message)s')
@@ -25,6 +25,7 @@ def get_logger(log_filepath, logger_name,
 
 
 def class_logger(log_filepath: str, logger_name: str, *logger_args, **logger_kwargs):
+    """Decorator for MqttDevice subclasses to attach a logger."""
     def inner(cls):
         @wraps(cls)
         def wrapper(*args, **kwargs):

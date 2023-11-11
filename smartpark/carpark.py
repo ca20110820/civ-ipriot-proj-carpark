@@ -60,15 +60,19 @@ class CarPark(MqttDevice):
         return num_available_bays
 
     def get_parked_cars(self) -> List[Car]:
+        """Get List of Parked Cars"""
         return [car for car in self._cars if car.is_parked]
 
     def get_un_parked_cars(self) -> List[Car]:
+        """Get List of Un-Parked Cars"""
         return [car for car in self._cars if not car.is_parked]
 
     def get_all_cars(self) -> List[Car]:
+        """Get List of All Cars"""
         return self.get_parked_cars() + self.get_un_parked_cars()
 
     def register_sensor_topic(self, sensor_topic: str, *args, **kwargs):
+        """Register a Sensor Topic"""
         if sensor_topic in self._sensor_topics:
             return
 
@@ -76,6 +80,7 @@ class CarPark(MqttDevice):
         self.client.subscribe(sensor_topic, *args, **kwargs)
 
     def unregister_sensor_topic(self, sensor_topic: str, *args, **kwargs):
+        """Unregister a Sensor Topic"""
         if sensor_topic not in self._sensor_topics:
             return
 
@@ -83,19 +88,32 @@ class CarPark(MqttDevice):
         self.client.unsubscribe(sensor_topic, *args, **kwargs)
 
     def add_car(self, car: Car):
+        """Add a Car in the Car Park"""
         assert self.temperature is not None, "Update the Temperature!"
+
+        # Note: The recently added car does not necessarily get parked first.
+
         car.entered_car_park(self.temperature)
         self._entry_or_exit_time = car.entry_time
         self._cars.append(car)
 
     def remove_car(self, car: Car):
+        """Remove a Car from the Car Park"""
         assert self.temperature is not None, "Update the Temperature!"
+
+        # Note: As an example, we can randomly select any car (parked or un-parked) to exit.
+        # Need to implement logic in on_car_exit() method.
+
         car.exited_car_park(self.temperature)
         self._entry_or_exit_time = car.exit_time
         self._cars = [c for c in self._cars if c.license_plate != car.license_plate]
 
     def publish_to_display(self):
-        # "<available-bays>;<temperature>;<time>;<total-cars>;<parked-cars>;<un-parked-cars>"
+        """Publish the latest Entry/Exit Event to listening Displays.
+
+        Format of Message String:
+        "<available-bays>;<temperature>;<time>;<total-cars>;<parked-cars>;<un-parked-cars>"
+        """
         msg_str = f"{self.available_bays};" \
                   f"{self.temperature};" \
                   f"{self._entry_or_exit_time.strftime('%Y-%m-%d %H:%M:%S')};"\
@@ -108,6 +126,8 @@ class CarPark(MqttDevice):
         print("=" * 100, "\n")
 
     def _print_car_park_state(self):
+        """Print Car Park State"""
+
         print_dict = {"Available Bays": self.available_bays,
                       "Number of Cars": self.total_cars,
                       "Number of Parked Cars": self.parked_cars,
@@ -127,7 +147,7 @@ class CarPark(MqttDevice):
         raise NotImplementedError()
 
     def on_car_exit(self, *args, **kwargs):
-        """Override and Implement how a car which car would exit and un-park"""
+        """Override and Implement how a car which car would un-park and exit"""
         raise NotImplementedError()
 
     def on_message(self, client: paho.Client, userdata: Any, message: paho.MQTTMessage):

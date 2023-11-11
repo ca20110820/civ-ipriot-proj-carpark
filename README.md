@@ -2,6 +2,29 @@
 
 A simulated workplace environment where students must demonstrate OO skills by interpreting and interacting with modern software requirements.
 
+## Installation and Running - ca20110820
+Assume you have Python 3.10+ in your local machine with pip & virtualenv. Make sure you have 
+[eclipse mosquitto](https://mosquitto.org/) installed and running.
+
+### Run Mosquitto Broker
+Open a Shell and run `mosquitto -v` where `-v` is for verbose logging.
+
+### Setup and Running
+1. `git clone -b approach-1-simple-mqtt https://github.com/ca20110820/civ-ipriot-proj-carpark.git`
+2. `cd civ-ipriot-proj-carpark/`
+3. `python -m venv venv`
+4. Activate `venv`
+5. `python -m pip install -e .`
+6. Run `python smartpark`
+
+### Running Samples
+Do the same steps from 1-5 in the previous section. Run using the following
+examples:
+   - `python samples_and_snippets/sample_tk_gui/run_the_sample.py`
+   - `python samples_and_snippets/sample_random_detector/run_the_sample.py`
+   - `python samples_and_snippets/sample_multi_display/run_the_sample.py`
+
+
 ## Scenario
 
 You are working as a junior software innovation engineer for the City of Moondalup in the Department of Transport. The department wants to upgrade a few public parking spaces by providing information about the number of available parking spots in near real time for each one. The parking lots in question do not have boom gates.

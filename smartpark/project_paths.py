@@ -3,7 +3,7 @@ import os
 
 import smartpark
 
-
+# Paths
 PROJECT_ROOT_DIR = Path(smartpark.__file__).resolve().parent.parent
 SMART_PARK_DIR = Path(smartpark.__file__).resolve().parent
 

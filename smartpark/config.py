@@ -60,12 +60,8 @@ from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
 class Config:
-    # Config can handle multiple instances of the Car Park, and each Car Park may have
-    # multiple Sensors (representing the entrance for the whole Car Park, and not per bay).
-    # Assumption: The Initial Number of Cars in the Car Park is Zero.
-    # Assumption: The Number of Cars inside the Car Park (both Parked & Not) can be theoretically infinite.
-    # Assumption: When a Car Enters the Car Park, if there is an available parking bay, then the car will
-    # automatically be parked.
+    """Class for Parsing a Configuration File.
+    """
     def __init__(self, config_file_path: str):
         self._config_file_path = config_file_path
 
@@ -84,13 +80,22 @@ class Config:
 
     @property
     def car_park_configs(self):
+        """List of 'Complete' Raw Configurations of Car Parks. This includes the  configurations of Sensors and
+        Displays. Not to be confused with CarPark Configuration as a Class"""
         return self._car_park_dict_configs
 
     def get_car_park_names(self) -> List[str]:
+        """Returns the List of Car Park Names"""
         return [car_park_config["name"] for car_park_config in self._car_park_dict_configs]
 
     def _get_common_config(self, car_park_name: str) -> dict:
-        # Returns the common config keys: topic-root, host, port
+        """Returns the Common Configuration Key-Value Pairs
+
+        This includes:
+            - topic-root: str
+            - host: str
+            - port: int
+        """
         if car_park_name not in self.get_car_park_names():
             # TODO: Create a Decorator for Checking whether the car_park_name exist.
             raise ValueError("The given car park name is not in the configuration file.")
@@ -104,7 +109,8 @@ class Config:
                 return out_dict
 
     def _get_car_park_complete_config(self, car_park_name: str) -> dict:
-        # Returns the Config for the Whole Car Park, including Sensors and Displays, not the Car Park class
+        """Returns the Config for the Whole Car Park, including Sensors and Displays, not the Car Park class from
+        a given Car Park Name"""
         if car_park_name not in self.get_car_park_names():
             raise ValueError("The given car park name is not in the configuration file.")
 
@@ -113,6 +119,7 @@ class Config:
                 return car_park_dict_config
 
     def get_sensor_configs(self, car_park_name: str) -> List[dict]:
+        """Returns a List of Sensor Configurations as a Dictionary from a given Car Park Name"""
         common_config = self._get_common_config(car_park_name)
         sensor_dict_configs: List[dict] = self._get_car_park_complete_config(car_park_name)["sensors"]
 
@@ -128,6 +135,7 @@ class Config:
         return out_sensor_configs
 
     def get_car_park_config(self, car_park_name: str) -> dict:
+        """Returns a Car Park Configuration as a Dictionary from a given Car Park Name"""
         # Return the configuration for instantiating a CarPark instance
         if car_park_name not in self.get_car_park_names():
             raise ValueError("The given car park name is not in the configuration file.")
@@ -145,6 +153,7 @@ class Config:
         return out_dict | common_config
 
     def get_display_configs(self, car_park_name: str) -> List[dict]:
+        """Returns a List of Display Configurations as a Dictionary from a given Car Park Name"""
         common_config = self._get_common_config(car_park_name)
         display_dict_configs: List[dict] = self._get_car_park_complete_config(car_park_name)["displays"]
 
@@ -165,8 +174,14 @@ class Config:
         return out_display_configs
 
     def get_sensor_pub_topics(self, car_park_name: str) -> List[str]:
-        # "<topic-root>/<location>/<sensor-name>/entry" and
-        # "<topic-root>/<location>/<sensor-name>/exit"
+        """Create and Get Sensor Publication Topic Strings from a given Car Park Name.
+
+        This method can be used by a Car Park instance for subscribing/registering sensor topics.
+
+        Formats:
+            - "<topic-root>/<location>/<sensor-name>/entry"
+            - "<topic-root>/<location>/<sensor-name>/exit"
+        """
 
         sensor_pub_topics = []
 
@@ -180,12 +195,19 @@ class Config:
         return sensor_pub_topics
 
     def create_car_park_display_topic(self, car_park_name: str) -> str:
+        """Create and Get Topic for Publishing to Displays.
+
+        This method can be used by a Display instance."""
         car_park_config = self.get_car_park_config(car_park_name)
         topic = f"{car_park_config['topic-root']}/{car_park_config['location']}/" \
                 f"{car_park_config['name']}/display"
         return topic
 
     def get_sensor_config_dict(self, car_park_name: str, sensor_name: str, sensor_type: str) -> dict | None:
+        """Getting a Sensor Configuration by Car Park Name, Sensor Name, and Sensor Type ('entry'/'exit')
+
+        Used as argument for Sensor construction to filter and get entry and exit sensor configurations.
+        """
         sensor_config_dict_list = self.get_sensor_configs(car_park_name)
         for sensor_config_dict in sensor_config_dict_list:
             if sensor_config_dict["name"] == sensor_name and sensor_config_dict["topic-qualifier"] == sensor_type:
