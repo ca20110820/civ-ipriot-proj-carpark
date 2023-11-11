@@ -146,15 +146,16 @@ class SimulatedCarPark(CarPark):
         # Generate a Random Car
         car = Car.generate_random_car(["ModelA", "ModelB", "ModelC"])
 
-        self.add_car(car)
+        self.add_car(car)  # By default, this will be un-parked, thus there will be at least 1 un-parked car(s)
         self.logger.info(f"Car Entered - {car.to_json_format()}")
 
-        if self.available_bays > 0:  # If there are available bay(s), park the car immediately
-            car.car_parked()
-            assert self._cars[-1].is_parked, "The recently added car failed to park!"
-            self.logger.info(f"Car '{car}' got parked")
+        if self.available_bays > 0:  # If there are available bay(s)
+            # Select a Car to be parked, car who just entered or un-parked car(s)
+            car_to_park = random.choice(self.get_un_parked_cars())
+            car_to_park.car_parked()
+            self.logger.info(f"Car '{car_to_park}' got parked")
+            print(car_to_park.to_json_format(indent=4))
 
-        print(car.to_json_format(indent=4))
         self.publish_to_display()
 
     def on_car_exit(self):
