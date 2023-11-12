@@ -55,7 +55,10 @@ class MockCarPark(CarPark):
             print(car.to_json_format(indent=4))
             self.publish_to_display()
         else:
+            if self.entry_or_exit_time is None:
+                self.entry_or_exit_time = datetime.now()
             print("There are no cars in the park to exit!")
+
         return car
 
     def on_message(self, client, userdata, message):

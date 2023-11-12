@@ -36,7 +36,15 @@ class CarPark(MqttDevice):
     @temperature.setter
     def temperature(self, value):
         self._temperature = value
-    
+
+    @property
+    def entry_or_exit_time(self):
+        return self._entry_or_exit_time
+
+    @entry_or_exit_time.setter
+    def entry_or_exit_time(self, value: datetime):
+        self._entry_or_exit_time = value
+
     @property
     def total_cars(self) -> int:
         return len(self._cars)
@@ -108,7 +116,7 @@ class CarPark(MqttDevice):
         self._entry_or_exit_time = car.exit_time
         self._cars = [c for c in self._cars if c.license_plate != car.license_plate]
 
-    def publish_to_display(self):
+    def publish_to_display(self) -> str:
         """Publish the latest Entry/Exit Event to listening Displays.
 
         Format of Message String:
@@ -124,6 +132,7 @@ class CarPark(MqttDevice):
         self.client.publish(self.display_topic, msg_str)
         self._print_car_park_state()
         print("=" * 100, "\n")
+        return msg_str
 
     def _print_car_park_state(self):
         """Print Car Park State"""
@@ -192,6 +201,11 @@ class SimulatedCarPark(CarPark):
             self.publish_to_display()
         else:
             self.logger.warning(f"Exiting while there's no cars in Car Park")
+
+            # Important for Simulation when the first random "signal" is exit when there are no cars in the Car Park.
+            if self.entry_or_exit_time is None:
+                self.entry_or_exit_time = datetime.now()
+
             print("There are no cars in the park to exit!")
 
     @quit_listener
