@@ -63,21 +63,28 @@ class TestSensor(unittest.TestCase):
                                      )
 
     def test_message(self):
+        count = 0
         for message in self.detector.start_sensing():
             if message is None:
                 print("Message was None! Stop Sensing ...")
                 break
 
+            count += 1
+
             rnd_enter_or_exit = random.choice(["Enter", "Exit"])
             rnd_temperature = random.randint(20, 30)
             rnd_message = f"{rnd_enter_or_exit},{rnd_temperature}"
 
-            self.assertEqual(rnd_message, message)
-            self.assertEqual(len(message.split(',')), 2)
             enter_or_exit, temperature = message.split(',')
+            self.assertEqual(rnd_message, message)
+            self.assertEqual(rnd_enter_or_exit, enter_or_exit)
+            self.assertEqual(rnd_temperature, int(temperature))
+            self.assertEqual(len(message.split(',')), 2)
             self.assertIn(enter_or_exit, ['Enter', 'Exit'])
             self.assertLessEqual(float(temperature), 30)
             self.assertGreaterEqual(float(temperature), 20)
+
+        self.assertEqual(count, 30)
 
 
 class TestFileDetector(unittest.TestCase):
