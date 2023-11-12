@@ -1,6 +1,7 @@
 import unittest
 
 from datetime import datetime
+import time
 import random
 import os
 
@@ -37,6 +38,8 @@ class MockCarPark(CarPark):
             car_to_park = random.choice(self.get_un_parked_cars())
             car_to_park.car_parked()
 
+        self.publish_to_display()
+
         # Only return the car who just entered, not parked
         return car
 
@@ -47,11 +50,13 @@ class MockCarPark(CarPark):
         if car is not None:
             car.car_unparked()  # Un-park the car regardless if it's parked or not!
             self.remove_car(car)
-            print(car.to_json_format(indent=4))
+            # print(car.to_json_format(indent=4))
         else:
             if self.entry_or_exit_time is None:
                 self.entry_or_exit_time = datetime.now()
             print("There are no cars in the park to exit!")
+
+        self.publish_to_display()
 
         return car
 
@@ -64,19 +69,27 @@ class MockDisplay(Display):
     DATA: list = []
 
     def start_listening(self):
-        pass
+        self.client.loop()
 
     def on_message(self, client, userdata, message):
-        pass
-
-    def mock_on_message(self, message: str):
         # ["<available-bays>", "<temperature>", "<time>", "<num-cars>", "<num-parked-cars>", "<num-un-parked-cars>"]
+        data = message.payload.decode()  # "<Entry|Exit>,<temperature>"
+        msg_str = data.split(';')
+        self.DATA.append(msg_str)
 
-        msg = message.split(';')
+    def get_clean_data(self):
+        clean_data = []
+        for data in self.DATA:
+            temp_ls = [None] * 6
+            temp_ls[0] = int(data[0])
+            temp_ls[1] = float(data[1])
+            temp_ls[2] = datetime.strptime(data[2], "%Y-%m-%d %H:%M:%S")
+            temp_ls[3] = int(data[3])
+            temp_ls[4] = int(data[4])
+            temp_ls[5] = int(data[5])
+            clean_data.append(temp_ls)
 
-        self.DATA.append(msg)
-
-        return msg
+        return clean_data
 
 
 class TestDisplay(unittest.TestCase):
@@ -95,21 +108,25 @@ class TestDisplay(unittest.TestCase):
         self.assertEqual(len(self.display.DATA), 0)
 
         for enter_or_exit, temperature in self.detector.start_sensing():
-            print(f"Signal: {enter_or_exit},{temperature}")
+            time.sleep(0.03)  # Need to slow the loop, otherwise mqtt may not catch up and result in error.
             self.car_park.temperature = temperature
             if enter_or_exit == "Enter":
                 self.car_park.on_car_entry()
+                self.display.start_listening()
 
             if enter_or_exit == "Exit":
                 self.car_park.on_car_exit()
+                self.display.start_listening()
 
-            msg_str = self.car_park.publish_to_display()
-            self.assertIsInstance(msg_str, str)
-            received_msg = self.display.mock_on_message(msg_str)
-            self.assertIsInstance(received_msg, list)
-            self.assertEqual(len(received_msg), 6)
+            self.display.start_listening()
 
         self.assertEqual(len(self.display.DATA), 30)
+
+        self.assertTrue(all([len(data) == 6 for data in self.display.DATA]))
+
+        self.assertTrue(
+            all([(type(msg) is list and all([type(elem) is str for elem in msg])) for msg in self.display.DATA])
+        )
 
 
 if __name__ == "__main__":
