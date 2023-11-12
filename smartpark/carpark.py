@@ -215,9 +215,9 @@ class SimulatedCarPark(CarPark):
 
 if __name__ == "__main__":
     from smartpark.config import Config
-    from smartpark.project_paths import PROJECT_ROOT_DIR
+    from smartpark.project_paths import CONFIG_DIR
 
-    toml_path = PROJECT_ROOT_DIR / 'configurations' / 'sample_smartpark_config.toml'
+    toml_path = CONFIG_DIR / 'sample_smartpark_config.toml'
 
     car_park_config = Config(toml_path)
 
