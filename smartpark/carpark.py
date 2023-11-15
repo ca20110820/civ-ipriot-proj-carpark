@@ -5,6 +5,7 @@ import paho.mqtt.client as paho
 from typing import List, Any
 from datetime import datetime
 
+from smartpark.config import Config
 from smartpark.utils import quit_listener
 from smartpark.mqtt_device import MqttDevice
 from smartpark.car import Car
@@ -227,17 +228,23 @@ class SimulatedCarPark(CarPark):
             self.on_car_exit()
 
 
+def create_car_park_from_config_path(car_park_type, config_path: str, car_park_name: str, *args, **kwargs):
+    """Alternative CarPark Constructor from Configuration Path"""
+    # No need to create some Factory class for now.
+    config = Config(config_path)
+
+    instance = car_park_type(config.get_car_park_config(car_park_name), *args, **kwargs)
+
+    for sensor_topic in config.get_sensor_pub_topics(car_park_name):
+        instance.register_sensor_topic(sensor_topic)
+
+    return instance
+
+
 if __name__ == "__main__":
-    from smartpark.config import Config
     from smartpark.project_paths import CONFIG_DIR
 
-    toml_path = CONFIG_DIR / 'sample_smartpark_config.toml'
-
-    car_park_config = Config(toml_path)
-
-    car_park = SimulatedCarPark(car_park_config.get_car_park_config("carpark1"))
-    print(car_park.display_topic)
-    for sensor_top in car_park_config.get_sensor_pub_topics("carpark1"):
-        car_park.register_sensor_topic(sensor_top)
+    toml_path = str(CONFIG_DIR / 'sample_smartpark_config.toml')
+    car_park = create_car_park_from_config_path(SimulatedCarPark, toml_path, "carpark1")
 
     car_park.start_serving()
