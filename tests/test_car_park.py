@@ -1,16 +1,13 @@
 import unittest
 
 from datetime import datetime
-import paho.mqtt.client as paho
 import random
-import threading
-import os
 
 from smartpark.config import Config
 from smartpark.carpark import SimulatedCarPark, CarPark
-from smartpark.sensor import Sensor, Detector
+from smartpark.sensor import Detector
 from smartpark.car import Car
-from smartpark.project_paths import CONFIG_DIR
+from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
 random.seed(0)
@@ -18,7 +15,7 @@ random.seed(0)
 
 class MockDetector(Detector):
     def start_sensing(self):
-        with open(os.path.join(os.path.dirname(__file__), "sample_signals.txt"), "r") as file:
+        with open(PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt', "r") as file:
             for line in file:
                 line = line.rstrip()
                 signal, temperature = line.split(',')
@@ -68,7 +65,7 @@ class MockCarPark(CarPark):
 class TestCarPark(unittest.TestCase):
     def setUp(self) -> None:
         self.car_park_name = "carpark1"
-        self.config = Config(CONFIG_DIR / 'sample_smartpark_config.toml')
+        self.config = Config(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml')
         self.car_park = MockCarPark(self.config.get_car_park_config(self.car_park_name))
         self.detector = MockDetector()
         self.fixed_num_bays = self.config.get_car_park_config(self.car_park_name)["total_bays"]

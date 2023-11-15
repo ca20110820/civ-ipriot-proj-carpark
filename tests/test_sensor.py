@@ -1,10 +1,9 @@
 import unittest
 import random
-import os
 
 from smartpark.config import Config
 from smartpark.sensor import Sensor, Detector, FileDetector
-from smartpark.project_paths import CONFIG_DIR, PROJECT_ROOT_DIR
+from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
 random.seed(0)  # Seed=0 & SampleSize=30 & min_temperature=20 & max_temperature=30
@@ -18,7 +17,7 @@ class MockSensor(Sensor):
 
     @staticmethod
     def mock_temperature_generator():
-        with open(os.path.join(os.path.dirname(__file__), "sample_signals.txt"), 'r') as file:
+        with open(PROJECT_ROOT_DIR / 'tests' / "sample_signals.txt", 'r') as file:
             for line in file:
                 yield int(line.rstrip().split(',')[1])
 
@@ -42,7 +41,7 @@ class MockDetector(Detector):
         self.exit_sensor = MockExitSensor(exit_sensor_config)
 
     def start_sensing(self):
-        with open(os.path.join(os.path.dirname(__file__), "sample_signals.txt"), "r") as file:
+        with open(PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt', "r") as file:
             for line in file:
                 line = line.rstrip()
                 signal, temperature = line.split(',')
@@ -56,7 +55,7 @@ class MockDetector(Detector):
 
 class TestSensor(unittest.TestCase):
     def setUp(self) -> None:
-        config = Config(CONFIG_DIR / 'sample_smartpark_config.toml')
+        config = Config(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml')
 
         self.detector = MockDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                                      config.get_sensor_config_dict("carpark1", "sensor2", "exit")
@@ -89,7 +88,7 @@ class TestSensor(unittest.TestCase):
 
 class TestFileDetector(unittest.TestCase):
     def setUp(self) -> None:
-        config = Config(CONFIG_DIR / 'sample_smartpark_config.toml')
+        config = Config(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml')
 
         self.detector = FileDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
                                      config.get_sensor_config_dict("carpark1", "sensor2", "exit"),
