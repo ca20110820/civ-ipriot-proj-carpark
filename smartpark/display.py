@@ -166,7 +166,6 @@ class TkGUIDisplay(Display):
 class ConsoleDisplay(Display):
     def __init__(self, config: dict, display_topic: str, *args, **kwargs):
         super().__init__(config, display_topic, *args, **kwargs)
-        self.start_listening()
 
     def start_listening(self):
         self.logger.info(f"Started Listening ...")
