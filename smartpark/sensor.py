@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Type, TypeVar
 import time
 from abc import ABC, abstractmethod
 import tkinter as tk
@@ -228,6 +228,38 @@ class RandomDetector(Detector):
                 exit()
 
 
+_T = TypeVar('_T', bound=Detector)
+
+
+class DetectorFactory:
+    def __init__(self, config_path: str, car_park_name: str):
+        self._config = Config(config_path)
+        self._car_park_name = car_park_name
+
+    def create_detector_entry_exit(self, detector_type: Type[_T], entry_sensor_name: str, exit_sensor_name: str, *args,
+                                   **kwargs):
+        # This method is used when a pair of entry-exit sensors have difference names.
+        return detector_type(self._config.get_sensor_config_dict(self._car_park_name, entry_sensor_name, "entry"),
+                             self._config.get_sensor_config_dict(self._car_park_name, exit_sensor_name, "exit"),
+                             *args, **kwargs
+                             )
+
+    def create_detector_entry_exit_same_name(self, detector_type: Type[_T], sensor_name: str, *args, **kwargs):
+        # This method is used when a pair of entry-exit sensors have same names.
+        return detector_type(self._config.get_sensor_config_dict(self._car_park_name, sensor_name, "entry"),
+                             self._config.get_sensor_config_dict(self._car_park_name, sensor_name, "exit"),
+                             *args, **kwargs
+                             )
+
+    def create_detector_entry(self):
+        # Some Detectors may only require entry sensor.
+        ...
+
+    def create_detector_exit(self):
+        # Some Detectors may only require exit sensor.
+        ...
+
+
 if __name__ == '__main__':
     from smartpark.config import Config
     from smartpark.project_paths import CONFIG_DIR
@@ -250,6 +282,10 @@ if __name__ == '__main__':
     # for s, t in detector.start_sensing():
     #     print(f"{s},{t}")
 
-    TkDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
-               config.get_sensor_config_dict("carpark1", "sensor2", "exit")) \
-        .start_sensing()
+    # TkDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
+    #            config.get_sensor_config_dict("carpark1", "sensor2", "exit")) \
+    #     .start_sensing()
+
+    detector = DetectorFactory(CONFIG_DIR / 'sample_smartpark_config.toml', "carpark1").create_detector_entry_exit(
+        TkDetector, "sensor1", "sensor2")
+    detector.start_sensing()
