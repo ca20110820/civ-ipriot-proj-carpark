@@ -1,18 +1,19 @@
 from pathlib import Path
 
 from smartpark.config import Config
-from smartpark.display import TkGUIDisplay
+from smartpark.display import TkGUIDisplay, create_display_from_config_path
 
 if __name__ == "__main__":
     curr_dir = Path(__file__).resolve().parent
     config_path = str(curr_dir / "config.toml")
     config = Config(config_path)
 
-    display_config = config.get_display_configs("carpark")[0]
-
-    display = TkGUIDisplay(display_config,
-                           config.create_car_park_display_topic("carpark"),
-                           window_title=display_config["location"]
-                           )
+    display = create_display_from_config_path(TkGUIDisplay,
+                                              config_path,
+                                              "carpark",
+                                              "display1",
+                                              window_title=config.get_display_config_dict("carpark", "display1")[
+                                                  "location"]
+                                              )
 
     display.start_listening()

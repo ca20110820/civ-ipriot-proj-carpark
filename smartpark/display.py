@@ -6,6 +6,7 @@ import threading
 import tkinter as tk
 import pprint
 
+from smartpark.config import Config
 from smartpark.utils import quit_listener, create_path_if_not_exists
 from smartpark.mqtt_device import MqttDevice
 from smartpark.logger import class_logger
@@ -190,20 +191,30 @@ class ConsoleDisplay(Display):
         print("=" * 100)
 
 
+def create_display_from_config_path(display_type, config_path: str, car_park_name: str, display_name: str, *args,
+                                    **kwargs):
+    config = Config(config_path)
+    display_config_dict = config.get_display_config_dict(car_park_name, display_name)
+    display_topic = config.create_car_park_display_topic(car_park_name)
+    return display_type(display_config_dict, display_topic, *args, **kwargs)
+
+
 if __name__ == "__main__":
-    from smartpark.config import Config
     from smartpark.project_paths import CONFIG_DIR
 
     toml_path = CONFIG_DIR / 'sample_smartpark_config.toml'
 
-    car_park_config = Config(toml_path)
-    display_config = car_park_config.get_display_configs("carpark1")[0]
-    pprint.pprint(display_config)
-    display = TkGUIDisplay(display_config,
-                           car_park_config.create_car_park_display_topic("carpark1"),
-                           car_park_config.get_car_park_config("carpark1")["location"]
-                           )
+    display = create_display_from_config_path(TkGUIDisplay,
+                                              toml_path,
+                                              "carpark1",
+                                              "display1",
+                                              window_title="Moondaloop Park"
+                                              )
 
-    # display = ConsoleDisplay(display_config, car_park_config.create_car_park_display_topic("carpark1"))
+    # display = create_display_from_config_path(ConsoleDisplay,
+    #                                           toml_path,
+    #                                           "carpark1",
+    #                                           "display1"
+    #                                           )
 
     display.start_listening()

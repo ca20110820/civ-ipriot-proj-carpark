@@ -214,6 +214,11 @@ class Config:
                 return sensor_config_dict
         return None
 
+    def get_display_config_dict(self, car_park_name: str, display_name: str):
+        for display_config_dict in self.get_display_configs(car_park_name):
+            if display_config_dict['name'] == display_name:
+                return display_config_dict
+
 
 if __name__ == "__main__":
     config = Config(PROJECT_ROOT_DIR / 'configurations' / 'sample_smartpark_config.toml')
