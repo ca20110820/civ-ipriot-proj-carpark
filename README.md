@@ -24,6 +24,25 @@ examples:
    - `python samples_and_snippets/sample_random_detector/run_the_sample.py`
    - `python samples_and_snippets/sample_multi_display/run_the_sample.py`
 
+## Samples
+### Tkinter GUI
+
+```bash
+python smartpark
+```
+
+![Tkinter GUI Sample](media/Smartpark Sample.gif)
+
+### Random Sensor
+
+```bash
+python samples_and_snippets/sample_random_detector/run_the_sample.py
+```
+
+![Random Sensor Sample](media/Random Sensor.gif)
+
+### VirtualBox Host-only Ethernet Adapter
+
 
 ## Scenario
 
