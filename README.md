@@ -31,7 +31,7 @@ examples:
 python smartpark
 ```
 
-![Tkinter GUI Sample](media/Smartpark Sample.gif)
+![Tkinter GUI Sample](./media/Smartpark Sample.gif)
 
 ### Random Sensor
 
@@ -39,7 +39,7 @@ python smartpark
 python samples_and_snippets/sample_random_detector/run_the_sample.py
 ```
 
-![Random Sensor Sample](media/Random Sensor.gif)
+![Random Sensor Sample](./media/Random Sensor.gif)
 
 ### VirtualBox Host-only Ethernet Adapter
 
