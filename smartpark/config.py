@@ -54,13 +54,12 @@ name = "display2"
 from typing import List
 import toml
 import pprint
-import os
 
 from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
 class Config:
-    """Class for Parsing a Configuration File.
+    """Class for Parsing a TOML Configuration File.
     """
     def __init__(self, config_file_path: str):
         self._config_file_path = config_file_path
@@ -97,7 +96,6 @@ class Config:
             - port: int
         """
         if car_park_name not in self.get_car_park_names():
-            # TODO: Create a Decorator for Checking whether the car_park_name exist.
             raise ValueError("The given car park name is not in the configuration file.")
 
         for car_park_dict_config in self._car_park_dict_configs:
