@@ -9,6 +9,7 @@ class TestConfigParsing(unittest.TestCase):
         self.config = Config(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml')
 
     def test_car_park1(self):
+        """Test Parsing Configuration of 'carpark1'"""
         car_park_name = "carpark1"
         self.assertEqual(len(self.config.car_park_configs), 2)
         self.assertIn(car_park_name, self.config.get_car_park_names())
@@ -59,6 +60,7 @@ class TestConfigParsing(unittest.TestCase):
         self.assertIn(exit_sensor_config_dict, self.config.get_sensor_configs(car_park_name))
 
     def test_car_park2(self):
+        """Test Parsing Configuration of 'carpark2'"""
         car_park_name = "carpark2"
         self.assertIn(car_park_name, self.config.get_car_park_names())
 

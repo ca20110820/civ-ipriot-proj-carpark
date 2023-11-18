@@ -103,7 +103,7 @@ class TestDisplay(unittest.TestCase):
                                    )
 
     def test_display(self):
-
+        """Test Display Receiving Correct Messages from CarPark"""
         self.assertEqual(len(self.display.DATA), 0)
 
         for enter_or_exit, temperature in self.detector.start_sensing():

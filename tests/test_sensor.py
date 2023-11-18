@@ -64,6 +64,7 @@ class TestSensor(unittest.TestCase):
         self.detector_factory = DetectorFactory(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml', 'carpark1')
 
     def test_message(self):
+        """Test Message Structure and Correctness from Sensor"""
         count = 0
         for message in self.detector.start_sensing():
             if message is None:
@@ -88,6 +89,7 @@ class TestSensor(unittest.TestCase):
         self.assertEqual(count, 30)
 
     def test_detector_factory(self):
+        """Test the Detector Factory"""
         detector = self.detector_factory.create_detector_entry_exit(FileDetector,
                                                                     'sensor1', 'sensor2',
                                                                     PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt'
@@ -115,6 +117,7 @@ class TestFileDetector(unittest.TestCase):
                                      )
 
     def test_detection(self):
+        """Test Output/Yield of FileDetector"""
         counter = 0
         for enter_or_exit, temperature in self.detector.start_sensing():
             print(f"{enter_or_exit},{temperature}")

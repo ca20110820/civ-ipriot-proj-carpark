@@ -18,6 +18,7 @@ type = "exit"
 
 [[car_parks.displays]]
 name = "display1"
+#location="<location>"  # Optional
 
 # -----------------------------------------------
 

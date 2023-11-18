@@ -71,7 +71,10 @@ class TestCarPark(unittest.TestCase):
         self.fixed_num_bays = self.config.get_car_park_config(self.car_park_name)["total_bays"]
 
     def test_on_message(self):
+        """Test the State of CarPark when a Car Entered/Exited"""
+        counter = 0
         for enter_or_exit, temperature in self.detector.start_sensing():
+            counter += 1
             if enter_or_exit == "Enter":
                 self.car_park.temperature = temperature
                 car = self.car_park.on_car_entry()
@@ -115,6 +118,8 @@ class TestCarPark(unittest.TestCase):
                     self.assertEqual(self.car_park.total_cars, 0)
             else:
                 break
+
+        self.assertEqual(counter, 30)
 
 
 if __name__ == "__main__":
