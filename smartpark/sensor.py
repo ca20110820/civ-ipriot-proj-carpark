@@ -4,10 +4,10 @@ from abc import ABC, abstractmethod
 import tkinter as tk
 import random
 
-
+from smartpark.config import Config
 from smartpark.mqtt_device import MqttDevice
 from smartpark.logger import class_logger
-from smartpark.project_paths import LOG_DIR
+from smartpark.project_paths import LOG_DIR, CONFIG_DIR
 
 
 class Sensor(MqttDevice):
@@ -261,9 +261,6 @@ class DetectorFactory:
 
 
 if __name__ == '__main__':
-    from smartpark.config import Config
-    from smartpark.project_paths import CONFIG_DIR
-
     toml_path = CONFIG_DIR / 'sample_smartpark_config.toml'
 
     config = Config(toml_path)

@@ -2,7 +2,7 @@ import unittest
 import random
 
 from smartpark.config import Config
-from smartpark.sensor import Sensor, Detector, FileDetector
+from smartpark.sensor import Sensor, Detector, FileDetector, DetectorFactory
 from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
@@ -61,6 +61,8 @@ class TestSensor(unittest.TestCase):
                                      config.get_sensor_config_dict("carpark1", "sensor2", "exit")
                                      )
 
+        self.detector_factory = DetectorFactory(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml', 'carpark1')
+
     def test_message(self):
         count = 0
         for message in self.detector.start_sensing():
@@ -82,6 +84,23 @@ class TestSensor(unittest.TestCase):
             self.assertIn(enter_or_exit, ['Enter', 'Exit'])
             self.assertLessEqual(float(temperature), 30)
             self.assertGreaterEqual(float(temperature), 20)
+
+        self.assertEqual(count, 30)
+
+    def test_detector_factory(self):
+        detector = self.detector_factory.create_detector_entry_exit(FileDetector,
+                                                                    'sensor1', 'sensor2',
+                                                                    PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt'
+                                                                    )
+
+        count = 0
+        for enter_or_exit, temperature in detector.start_sensing():
+            count += 1
+
+            self.assertIn(enter_or_exit, ['Enter', 'Exit'])
+            self.assertLessEqual(temperature, 30)
+            self.assertGreaterEqual(temperature, 20)
+            self.assertIsInstance(temperature, float)
 
         self.assertEqual(count, 30)
 
