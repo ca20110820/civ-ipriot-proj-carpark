@@ -6,7 +6,7 @@ Assume you have Python 3.10+ in your local machine with pip & virtualenv. Make s
 Open a Shell and run `mosquitto -v` where `-v` is for verbose logging.
 
 ### Setup and Running a Sample
-1. `git clone -b approach-1-simple-mqtt https://github.com/ca20110820/civ-ipriot-proj-carpark.git`
+1. `git clone https://github.com/ca20110820/civ-ipriot-proj-carpark.git`
 2. `cd civ-ipriot-proj-carpark/`
 3. `python -m venv venv`
 4. Activate `venv`
@@ -14,3 +14,4 @@ Open a Shell and run `mosquitto -v` where `-v` is for verbose logging.
 6. Examples:
    - `python samples_and_snippets/sample_tk_gui/run_the_sample.py`
    - `python samples_and_snippets/sample_random_detector/run_the_sample.py`
+   - `python samples_and_snippets/sample_multi_display/run_the_sample.py`
