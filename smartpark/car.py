@@ -1,5 +1,4 @@
 from datetime import datetime
-import time
 import random
 import string
 import json
@@ -192,19 +191,3 @@ class Car:
         rnd_license_plate = cls.generate_random_license_plate()
         rnd_car_model = cls.generate_random_car_model(car_model_list)
         return cls(rnd_license_plate, rnd_car_model)
-
-
-if __name__ == "__main__":
-    # play_car = Car("AAAA", "ModelA")
-    play_car = Car.generate_random_car(["AAA", "BBB", "CCC"])
-    play_car.entered_car_park(30)
-    play_car.car_parked()
-    print(play_car.to_json_format(indent=4))
-    play_car_json = play_car.to_json_format()
-    time.sleep(1)
-    reborn_car = Car.from_json(play_car_json)
-    reborn_car.car_unparked()
-    reborn_car.exited_car_park(31)
-    print(reborn_car.to_json_format(indent=4))
-
-    print(Car.from_csv(reborn_car.to_csv_format()).to_json_format(indent=4))

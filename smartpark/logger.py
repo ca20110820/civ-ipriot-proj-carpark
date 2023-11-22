@@ -1,10 +1,6 @@
 from functools import wraps
-from datetime import datetime
-from logging import FileHandler
 from logging.handlers import RotatingFileHandler
 import logging
-import os
-import json
 
 from smartpark.project_paths import LOG_DIR
 from smartpark.utils import create_path_if_not_exists

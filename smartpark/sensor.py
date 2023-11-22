@@ -265,24 +265,6 @@ if __name__ == '__main__':
 
     config = Config(toml_path)
 
-    # RandomDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
-    #                config.get_sensor_config_dict("carpark1", "sensor2", "exit"),
-    #                lower_bound=20, upper_bound=30, enter_prb=0.6,
-    #                min_time_interval=0.1, max_time_interval=0.5
-    #                ) \
-    #     .start_sensing()
-
-    # detector = FileDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
-    #                         config.get_sensor_config_dict("carpark1", "sensor2", "exit"),
-    #                         PROJECT_ROOT_DIR / 'tests' / 'sample_signals.txt',
-    #                         )
-    # for s, t in detector.start_sensing():
-    #     print(f"{s},{t}")
-
-    # TkDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
-    #            config.get_sensor_config_dict("carpark1", "sensor2", "exit")) \
-    #     .start_sensing()
-
     detector = DetectorFactory(CONFIG_DIR / 'sample_smartpark_config.toml', "carpark1").create_detector_entry_exit(
         TkDetector, "sensor1", "sensor2")
     detector.start_sensing()

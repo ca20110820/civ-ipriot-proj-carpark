@@ -4,7 +4,6 @@ from functools import wraps
 import paho.mqtt.client as paho
 import threading
 import tkinter as tk
-import pprint
 
 from smartpark.config import Config
 from smartpark.utils import quit_listener, create_path_if_not_exists
@@ -210,11 +209,5 @@ if __name__ == "__main__":
                                               "display1",
                                               window_title="Moondaloop Park"
                                               )
-
-    # display = create_display_from_config_path(ConsoleDisplay,
-    #                                           toml_path,
-    #                                           "carpark1",
-    #                                           "display1"
-    #                                           )
 
     display.start_listening()

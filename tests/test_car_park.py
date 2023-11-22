@@ -4,7 +4,7 @@ from datetime import datetime
 import random
 
 from smartpark.config import Config
-from smartpark.carpark import SimulatedCarPark, CarPark
+from smartpark.carpark import CarPark
 from smartpark.sensor import Detector
 from smartpark.car import Car
 from smartpark.project_paths import PROJECT_ROOT_DIR

@@ -1,6 +1,5 @@
 import concurrent.futures
 import subprocess
-import os
 import sys
 
 from smartpark.project_paths import SMART_PARK_DIR

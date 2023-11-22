@@ -1,61 +1,5 @@
-"""
-
-Example: config.toml
-[[car_parks]]
-name = "carpark1"
-location = "Moondaloop Park"
-host = "localhost"
-port = 1883
-topic-root = "carpark1"
-total_bays = 5
-
-[[car_parks.sensors]]
-name = "sensor1"
-location = "L306"
-type = "entry"
-
-[[car_parks.sensors]]
-name = "sensor2"
-location = "L306"
-type = "exit"
-
-[[car_parks.displays]]
-name = "display1"
-
-# -----------------------------------------------
-
-[[car_parks]]
-name = "carpark2"
-location = "Jandurah Park"
-host = "localhost"
-port = 1883
-topic-root = "carpark2"
-total_bays = 1
-
-[[car_parks.sensors]]
-name = "sensor1"
-location = "L250"
-type = "entry"
-
-[[car_parks.sensors]]
-name = "sensor2"
-location = "L250"
-type = "exit"
-
-[[car_parks.displays]]
-name = "display1"
-
-[[car_parks.displays]]
-name = "display2"
-
-
-"""
-
 from typing import List
 import toml
-import pprint
-
-from smartpark.project_paths import PROJECT_ROOT_DIR
 
 
 class Config:
@@ -216,29 +160,3 @@ class Config:
         for display_config_dict in self.get_display_configs(car_park_name):
             if display_config_dict['name'] == display_name:
                 return display_config_dict
-
-
-if __name__ == "__main__":
-    config = Config(PROJECT_ROOT_DIR / 'configurations' / 'sample_smartpark_config.toml')
-
-    car_park = "carpark1"
-
-    print(config.config_file_path)
-    print(config.get_car_park_names())
-    print("-" * 50)
-    pprint.pprint(config.get_car_park_config(car_park))
-    print("-" * 50)
-    for sensor_conf in config.get_sensor_configs(car_park):
-        pprint.pprint(sensor_conf)
-        print("-" * 50)
-    for display_conf in config.get_display_configs(car_park):
-        pprint.pprint(display_conf)
-        print("-" * 50)
-    for sensor_topic in config.get_sensor_pub_topics(car_park):
-        print(sensor_topic)
-    print("-" * 50)
-    print(config.create_car_park_display_topic(car_park))
-    print("-" * 50)
-    print(config.get_sensor_config_dict(car_park, "sensor1", "entry"))
-    print("-" * 50)
-    print(config.get_sensor_config_dict(car_park, "sensor2", "exit"))

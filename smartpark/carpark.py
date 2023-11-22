@@ -169,7 +169,6 @@ class CarPark(MqttDevice):
 class SimulatedCarPark(CarPark):
     def start_serving(self):
         self.logger.info(f"Car Park Start Serving ...")
-        # e.g. self.client.loop_forever()
         self.client.loop_forever()
 
     def on_car_entry(self):
