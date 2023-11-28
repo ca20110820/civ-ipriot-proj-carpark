@@ -102,18 +102,29 @@ class TestDisplay(unittest.TestCase):
                                    self.config.create_car_park_display_topic("carpark1")
                                    )
 
-    def test_display(self):
+    def test_display_initialized_with_all_attributes(self):
+        self.assertEqual(self.display.name, 'display1')
+        self.assertEqual(self.display.location, 'Moondaloop Park')
+        self.assertEqual(self.display.topic_root, 'carpark1')
+        self.assertEqual(self.display.topic_qualifier, 'na')
+        self.assertEqual(self.display.host, 'localhost')
+        self.assertEqual(self.display.port, 1883)
+
+        self.assertEqual(self.display.display_topic, 'carpark1/Moondaloop Park/carpark1/display')
+        self.assertIsInstance(self.display, Display)
+
+    def test_update(self):
         """Test Display Receiving Correct Messages from CarPark"""
         self.assertEqual(len(self.display.DATA), 0)
 
         for enter_or_exit, temperature in self.detector.start_sensing():
-            time.sleep(0.03)  # Need to slow the loop, otherwise mqtt may not catch up and result in error.
+            # time.sleep(0.005)  # Need to slow the loop, otherwise mqtt may not catch up and result in error.
             self.car_park.temperature = temperature
             if enter_or_exit == "Enter":
                 self.car_park.on_car_entry()
                 self.display.start_listening()
 
-            if enter_or_exit == "Exit":
+            elif enter_or_exit == "Exit":
                 self.car_park.on_car_exit()
                 self.display.start_listening()
 
@@ -124,7 +135,7 @@ class TestDisplay(unittest.TestCase):
         self.assertTrue(all([len(data) == 6 for data in self.display.DATA]))
 
         self.assertTrue(
-            all([(type(msg) is list and all([type(elem) is str for elem in msg])) for msg in self.display.DATA])
+            all([(isinstance(msg, list) and all([isinstance(elem, str) for elem in msg])) for msg in self.display.DATA])
         )
 
 
