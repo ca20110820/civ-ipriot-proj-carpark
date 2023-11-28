@@ -55,16 +55,47 @@ class MockDetector(Detector):
 
 class TestSensor(unittest.TestCase):
     def setUp(self) -> None:
-        config = Config(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml')
+        self.config = Config(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml')
 
-        self.detector = MockDetector(config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
-                                     config.get_sensor_config_dict("carpark1", "sensor2", "exit")
+        self.detector = MockDetector(self.config.get_sensor_config_dict("carpark1", "sensor1", "entry"),
+                                     self.config.get_sensor_config_dict("carpark1", "sensor2", "exit")
                                      )
 
         self.detector_factory = DetectorFactory(PROJECT_ROOT_DIR / 'tests' / 'sample_config.toml', 'carpark1')
 
-    def test_message(self):
-        """Test Message Structure and Correctness from Sensor"""
+        # self.entry_sensor = MockEntrySensor(self.config.get_sensor_config_dict("carpark1", "sensor1", "entry"))
+        # self.exit_sensor = MockEntrySensor(self.config.get_sensor_config_dict("carpark1", "sensor2", "exit"))
+
+        self.entry_sensor = self.detector.entry_sensor
+        self.exit_sensor = self.detector.exit_sensor
+
+    def test_sensor_initialized_with_all_attributes(self):
+        self.assertEqual(self.entry_sensor.name, 'sensor1')
+        self.assertEqual(self.entry_sensor.location, 'L306')
+        self.assertEqual(self.entry_sensor.topic_root, 'carpark1')
+        self.assertEqual(self.entry_sensor.topic_qualifier, 'entry')
+        self.assertEqual(self.entry_sensor.host, 'localhost')
+        self.assertEqual(self.entry_sensor.port, 1883)
+        self.assertIsInstance(self.entry_sensor, Sensor)
+        self.assertIsInstance(self.entry_sensor, MockEntrySensor)
+
+        self.assertEqual(self.exit_sensor.name, 'sensor2')
+        self.assertEqual(self.exit_sensor.location, 'L306')
+        self.assertEqual(self.exit_sensor.topic_root, 'carpark1')
+        self.assertEqual(self.exit_sensor.topic_qualifier, 'exit')
+        self.assertEqual(self.exit_sensor.host, 'localhost')
+        self.assertEqual(self.exit_sensor.port, 1883)
+        self.assertIsInstance(self.exit_sensor, Sensor)
+        self.assertIsInstance(self.exit_sensor, MockExitSensor)
+
+    def test_detector_initialized_with_all_attributes(self):
+        self.assertIsInstance(self.detector.entry_sensor, Sensor)
+        self.assertIsInstance(self.detector.entry_sensor, MockEntrySensor)
+
+        self.assertIsInstance(self.detector.exit_sensor, Sensor)
+        self.assertIsInstance(self.detector.exit_sensor, MockExitSensor)
+
+    def test_detection(self):
         count = 0
         for message in self.detector.start_sensing():
             if message is None:
