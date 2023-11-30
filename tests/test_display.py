@@ -118,7 +118,7 @@ class TestDisplay(unittest.TestCase):
         self.assertEqual(len(self.display.DATA), 0)
 
         for enter_or_exit, temperature in self.detector.start_sensing():
-            # time.sleep(0.005)  # Need to slow the loop, otherwise mqtt may not catch up and result in error.
+            time.sleep(0.005)  # Need to slow the loop, otherwise mqtt may not catch up and result in error.
             self.car_park.temperature = temperature
             if enter_or_exit == "Enter":
                 self.car_park.on_car_entry()
